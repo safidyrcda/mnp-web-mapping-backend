@@ -21,10 +21,10 @@ export class AppController {
 
   @Get()
   async getData() {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
     const result: QueryResult<Row> = await this.pool.query(`
-      SELECT  ap_id, ST_AsGeoJSON(wkb_geometry) AS geometry
-      FROM public."ap_mnp_wgs84"
+      SELECT  sigle, ST_AsGeoJSON(geometry) AS geometry
+      FROM public."protected_area"
       LIMIT 50;
     `);
 
