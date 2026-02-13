@@ -13,7 +13,7 @@ export class ProtectedAreaRepository extends BaseRepository<ProtectedArea> {
     const result = await this.dataSource.query(`
       SELECT
         id,
-        sigle AS ap_id,
+        sigle,
         ST_AsGeoJSON(
           ST_Simplify(geometry, 0.01)
         )::json AS geometry
@@ -25,7 +25,7 @@ export class ProtectedAreaRepository extends BaseRepository<ProtectedArea> {
       type: 'Feature',
       geometry: r.geometry,
       properties: {
-        ap_id: r.ap_id,
+        sigle: r.sigle,
         id: r.id,
       },
     }));
@@ -38,7 +38,7 @@ export class ProtectedAreaRepository extends BaseRepository<ProtectedArea> {
       `
     SELECT
       id,
-      sigle AS ap_id,
+      sigle,
       ST_AsGeoJSON(geometry) AS geometry
     FROM public."protected_area"
     WHERE id = $1
@@ -55,7 +55,7 @@ export class ProtectedAreaRepository extends BaseRepository<ProtectedArea> {
       type: 'Feature',
       geometry: JSON.parse(row.geometry),
       properties: {
-        ap_id: row.ap_id,
+        sigle: row.sigle,
         id: row.id,
       },
     };

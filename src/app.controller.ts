@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Controller, Get, Inject } from '@nestjs/common';
 import { Pool, QueryResult } from 'pg';
 
@@ -21,7 +20,6 @@ export class AppController {
 
   @Get()
   async getData() {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
     const result: QueryResult<Row> = await this.pool.query(`
       SELECT  sigle, ST_AsGeoJSON(geometry) AS geometry
       FROM public."protected_area"
