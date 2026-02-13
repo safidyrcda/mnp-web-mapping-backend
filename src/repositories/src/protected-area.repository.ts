@@ -9,6 +9,19 @@ export class ProtectedAreaRepository extends BaseRepository<ProtectedArea> {
     super(dataSource, ProtectedArea);
   }
 
+  async find() {
+    const result = await this.dataSource.query(`
+      SELECT
+        id,
+        sigle
+      FROM public."protected_area"
+      LIMIT 50;
+    `);
+
+    console.log('Protected Areas:', result);
+    return result;
+  }
+
   async findAllGeoJSON() {
     const result = await this.dataSource.query(`
       SELECT

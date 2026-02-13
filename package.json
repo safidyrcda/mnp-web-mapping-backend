@@ -26,6 +26,7 @@
     "@nestjs/swagger": "^11.2.6",
     "@nestjs/typeorm": "^11.0.0",
     "@types/geojson": "^7946.0.16",
+    "class-validator": "^0.14.3",
     "pg": "^8.17.2",
     "postgresql": "^0.0.1",
     "reflect-metadata": "^0.2.2",

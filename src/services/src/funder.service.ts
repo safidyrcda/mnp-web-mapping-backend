@@ -8,4 +8,8 @@ export class FunderService extends BaseService<Funder> {
   constructor(protected repository: FunderRepository) {
     super(repository);
   }
+
+  create(data: Partial<Funder>): Promise<Funder> {
+    return this.repository.create(data);
+  }
 }

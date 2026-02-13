@@ -29,19 +29,6 @@ export class ProtectedAreaController {
     return this.protectedAreaService.findOneAPGeometry(id);
   }
 
-  @Post()
-  async create(@Body() data: ProtectedArea): Promise<ProtectedArea> {
-    return this.protectedAreaService.create(data);
-  }
-
-  @Patch(':id')
-  async update(
-    @Param('id') id: string,
-    @Body() data: Partial<ProtectedArea>,
-  ): Promise<ProtectedArea | null> {
-    return this.protectedAreaService.update(id, data);
-  }
-
   @Delete(':id')
   async delete(@Param('id') id: string): Promise<boolean> {
     return this.protectedAreaService.delete(id);

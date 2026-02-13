@@ -8,4 +8,11 @@ export class FundingRepository extends BaseRepository<Funding> {
   constructor(dataSource: DataSource) {
     super(dataSource, Funding);
   }
+
+  findByAPId(protectedAreaId: string): Promise<Funding[]> {
+    return this.dataSource.getRepository(Funding).find({
+      where: { protectedArea: { id: protectedAreaId } },
+      relations: ['protectedArea', 'funder'],
+    });
+  }
 }
