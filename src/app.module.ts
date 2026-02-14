@@ -6,6 +6,7 @@ import { DatabaseModule } from './modules/database.module';
 import { ProtectedAreaModule } from './modules/protected-area.module';
 import { FunderModule } from './modules/funder.module';
 import { FundingModule } from './modules/funding.module';
+import { ConfigModule } from '@nestjs/config';
 
 const pool: Pool = new Pool({
   user: 'postgres',
@@ -16,7 +17,16 @@ const pool: Pool = new Pool({
 });
 
 @Module({
-  imports: [DatabaseModule, ProtectedAreaModule, FunderModule, FundingModule],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: ['.env'],
+    }),
+    DatabaseModule,
+    ProtectedAreaModule,
+    FunderModule,
+    FundingModule,
+  ],
   controllers: [AppController],
 
   providers: [AppService, { provide: 'PG_POOL', useValue: pool }],
