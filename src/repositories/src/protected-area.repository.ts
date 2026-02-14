@@ -18,7 +18,6 @@ export class ProtectedAreaRepository extends BaseRepository<ProtectedArea> {
       LIMIT 50;
     `);
 
-    console.log('Protected Areas:', result);
     return result;
   }
 
@@ -62,7 +61,9 @@ export class ProtectedAreaRepository extends BaseRepository<ProtectedArea> {
 
     const row = result[0];
 
-    console.log('Row:', row);
+    if (!row) {
+      return null;
+    }
 
     const feature = {
       type: 'Feature',
