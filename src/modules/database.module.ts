@@ -5,6 +5,7 @@ import { Funder } from 'src/models/funder.model';
 import { Funding } from 'src/models/funding.model';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { Project } from 'src/models/project.model';
 
 @Global()
 @Module({
@@ -19,7 +20,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         password: configService.get<string>('DATABASE_PASSWORD'),
         database: configService.get('DATABASE_NAME'),
         schema: 'public',
-        entities: [Funder, Funding, ProtectedArea],
+        entities: [Funder, Funding, ProtectedArea, Project],
         synchronize: false,
       }),
       inject: [ConfigService],

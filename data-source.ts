@@ -3,6 +3,7 @@ import { DataSource } from 'typeorm';
 import { Funder } from './src/models/funder.model';
 import { Funding } from './src/models/funding.model';
 import { ProtectedArea } from './src/models/protected-area.model';
+import { Project } from './src/models/project.model';
 
 const env = process.env.NODE_ENV || 'development';
 
@@ -18,7 +19,7 @@ export const AppDataSource = new DataSource({
   database: process.env.DATABASE_NAME,
   schema: 'public',
 
-  entities: [Funder, Funding, ProtectedArea],
+  entities: [Funder, Funding, ProtectedArea, Project],
   migrations: ['src/migrations/*.ts'],
   synchronize: false,
 });
