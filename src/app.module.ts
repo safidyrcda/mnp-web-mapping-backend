@@ -8,14 +8,6 @@ import { FunderModule } from './modules/funder.module';
 import { FundingModule } from './modules/funding.module';
 import { ConfigModule } from '@nestjs/config';
 
-const pool: Pool = new Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'arcgis_test',
-  password: 'postgres',
-  port: 5432,
-});
-
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -27,8 +19,8 @@ const pool: Pool = new Pool({
     FunderModule,
     FundingModule,
   ],
-  controllers: [AppController],
+  controllers: [],
 
-  providers: [AppService, { provide: 'PG_POOL', useValue: pool }],
+  providers: [],
 })
 export class AppModule {}

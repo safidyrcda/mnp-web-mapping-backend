@@ -7,4 +7,7 @@ export class Funder {
 
   @Column({ nullable: true, type: 'varchar' })
   name: string;
+
+  @Column({ nullable: true, type: 'text' })
+  fullname: string;
 }
