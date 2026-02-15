@@ -1,4 +1,4 @@
-name: Backend
+name: Deploy Backend
 
 on:
   push:
@@ -6,14 +6,28 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted   # ← utiliser ton runner self-hosted
     steps:
-    - name: Déploiement SSH Frontend
-      uses: appleboy/ssh-action@v1.0.0
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        key: ${{ secrets.SSH_KEY }}
-        port: 22
-        script: |
-          echo "connection succed"
+      # 1️⃣ Récupérer le code
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2️⃣ Installer pnpm
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      # 3️⃣ Build et déploiement
+      - name: Build & Deploy Backend
+        run: |
+          cd /home/mnp-webmapping/backend
+          git fetch
+          git reset --hard origin/main
+          pnpm install
+          pnpm run migration:generate
+          pnpm run migration:run
+          pnpm run build
+          pm2 reload webmapping-backend
+          echo "Backend déployé avec succès ! 🚀"
+
