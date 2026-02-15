@@ -3,6 +3,7 @@ import { Funder } from 'src/models/funder.model';
 import { CreateFunderDto } from 'src/dtos/funder/create-funder.dto';
 import { ProjectService } from 'src/services/src/project.service';
 import { Project } from 'src/models/project.model';
+import { CreateProjectDto } from 'src/dtos/project/create-funder.dto';
 
 @Controller('projects')
 export class ProjectController {
@@ -14,7 +15,7 @@ export class ProjectController {
   }
 
   @Post()
-  async create(@Body() data: Project): Promise<Project> {
+  async create(@Body() data: CreateProjectDto): Promise<Project> {
     return this.projectService.create(data);
   }
 

@@ -8,15 +8,20 @@ import { FunderRepository } from 'src/repositories/src/funder.repository';
 import { ProtectedAreaRepository } from 'src/repositories/src/protected-area.repository';
 import { Funder } from 'src/models/funder.model';
 import { ProtectedArea } from 'src/models/protected-area.model';
+import { Project } from 'src/models/project.model';
+import { ProjectRepository } from 'src/repositories/src/project.repository';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Funding, Funder, ProtectedArea])],
+  imports: [
+    TypeOrmModule.forFeature([Funding, Funder, ProtectedArea, Project]),
+  ],
   controllers: [FundingController],
   providers: [
     FundingRepository,
     FunderRepository,
     ProtectedAreaRepository,
     FundingService,
+    ProjectRepository,
   ],
   exports: [FundingRepository, FundingService],
 })

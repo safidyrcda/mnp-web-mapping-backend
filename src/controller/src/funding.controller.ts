@@ -29,6 +29,7 @@ export class FundingController {
 
   @Post()
   async create(@Body() data: CreateFundingDto): Promise<Funding> {
+    console.log(data);
     return this.fundingService.create(data);
   }
 
