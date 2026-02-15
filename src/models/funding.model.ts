@@ -1,6 +1,7 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Funder } from './funder.model';
 import { ProtectedArea } from './protected-area.model';
+import { Project } from './project.model';
 
 @Entity()
 export class Funding {
@@ -17,4 +18,9 @@ export class Funding {
     nullable: true,
   })
   protectedArea: ProtectedArea;
+
+  @ManyToOne(() => Project, (project) => project.id, {
+    nullable: true,
+  })
+  project: Project;
 }

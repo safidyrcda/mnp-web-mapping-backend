@@ -5,9 +5,7 @@ import { Funding } from './src/models/funding.model';
 import { ProtectedArea } from './src/models/protected-area.model';
 import { Project } from './src/models/project.model';
 
-const env = process.env.NODE_ENV || 'development';
-
-dotenv.config({ path: `.env.${env}` });
+dotenv.config({ path: `.env` });
 dotenv.config();
 
 export const AppDataSource = new DataSource({
