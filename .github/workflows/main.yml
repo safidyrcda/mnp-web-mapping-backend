@@ -24,6 +24,7 @@ jobs:
           cd /home/safidy/mnp-webmapping/backend
           git fetch
           git reset --hard origin/main
+          ./remove-migrations.sh
           pnpm install
           pnpm run migration:generate
           pnpm run migration:run
