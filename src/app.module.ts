@@ -1,12 +1,10 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { Pool } from 'pg';
 import { DatabaseModule } from './modules/database.module';
 import { ProtectedAreaModule } from './modules/protected-area.module';
 import { FunderModule } from './modules/funder.module';
 import { FundingModule } from './modules/funding.module';
 import { ConfigModule } from '@nestjs/config';
+import { ProjectModule } from './modules/project.module';
 
 @Module({
   imports: [
@@ -18,6 +16,7 @@ import { ConfigModule } from '@nestjs/config';
     ProtectedAreaModule,
     FunderModule,
     FundingModule,
+    ProjectModule,
   ],
   controllers: [],
 

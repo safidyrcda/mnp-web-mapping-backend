@@ -1,0 +1,33 @@
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import { Funder } from 'src/models/funder.model';
+import { CreateFunderDto } from 'src/dtos/funder/create-funder.dto';
+import { ProjectService } from 'src/services/src/project.service';
+import { Project } from 'src/models/project.model';
+
+@Controller('projects')
+export class ProjectController {
+  constructor(private readonly projectService: ProjectService) {}
+
+  @Get()
+  async findAll(): Promise<Project[]> {
+    return this.projectService.findAll();
+  }
+
+  @Post()
+  async create(@Body() data: Project): Promise<Project> {
+    return this.projectService.create(data);
+  }
+
+  //   @Patch(':id')
+  //   async update(
+  //     @Param('id') id: string,
+  //     @Body() data: Partial<Funder>,
+  //   ): Promise<Funder | null> {
+  //     return this.funderService.update(id, data);
+  //   }
+
+  @Delete(':id')
+  async delete(@Param('id') id: string): Promise<boolean> {
+    return this.projectService.delete(id);
+  }
+}
