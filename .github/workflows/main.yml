@@ -21,7 +21,7 @@ jobs:
       # 3️⃣ Build et déploiement
       - name: Build & Deploy Backend
         run: |
-          cd /home/mnp-webmapping/backend
+          cd /home/safidy/mnp-webmapping/backend
           git fetch
           git reset --hard origin/main
           pnpm install
