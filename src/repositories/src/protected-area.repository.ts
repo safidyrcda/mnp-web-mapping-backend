@@ -36,6 +36,7 @@ export class ProtectedAreaRepository extends BaseRepository<ProtectedArea> {
         sigle,
         name,
         status,
+        ST_Area(geometry::geography) / 10000 AS size,
         ST_AsGeoJSON(
           ST_Simplify(geometry, 0.01)
         )::json AS geometry
@@ -49,6 +50,9 @@ export class ProtectedAreaRepository extends BaseRepository<ProtectedArea> {
       properties: {
         sigle: r.sigle,
         id: r.id,
+        name: r.name,
+        status: r.status,
+        size: r.size,
       },
     }));
 
@@ -63,7 +67,8 @@ export class ProtectedAreaRepository extends BaseRepository<ProtectedArea> {
       sigle,
       name,
       status,
-      ST_AsGeoJSON(geometry) AS geometry
+      ST_AsGeoJSON(geometry) AS geometry,
+      ST_Area(geometry::geography) / 10000 AS size 
     FROM public."protected_area"
     WHERE id = $1
     LIMIT 1;
@@ -83,6 +88,9 @@ export class ProtectedAreaRepository extends BaseRepository<ProtectedArea> {
       properties: {
         sigle: row.sigle,
         id: row.id,
+        name: row.name,
+        status: row.status,
+        size: row.size,
       },
     };
 
