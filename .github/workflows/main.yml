@@ -26,6 +26,7 @@ jobs:
           git reset --hard origin/main
           pnpm install
           pnpm run migration:run
+          pnpm run seed
           pnpm run build
           pm2 reload webmapping-backend
           echo "Backend déployé avec succès ! 🚀"
