@@ -16,8 +16,5 @@ export class AutoMigration1771218571977 implements MigrationInterface {
     await queryRunner.query(
       `ALTER TABLE "public"."protected_area" ALTER COLUMN "geometry" TYPE geometry(GEOMETRY,0)`,
     );
-    await queryRunner.query(
-      `ALTER TABLE "public"."funder" DROP COLUMN "fullname"`,
-    );
   }
 }
