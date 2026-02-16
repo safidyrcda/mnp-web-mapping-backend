@@ -5,9 +5,6 @@ export class AutoMigration1771218571977 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `ALTER TABLE "public"."funder" ADD "fullname" text`,
-    );
-    await queryRunner.query(
       `ALTER TABLE "public"."protected_area" ALTER COLUMN "geometry" TYPE geometry`,
     );
   }
