@@ -12,7 +12,6 @@ async function bootstrap() {
     DATABASE_HOST: process.env.DATABASE_HOST,
     DATABASE_NAME: process.env.DATABASE_NAME,
     DATABASE_LISTEN_PORT: process.env.DATABASE_LISTEN_PORT,
-    FRONTEND_URL: process.env.FRONTEND_URL || 'http://localhost:3000',
   });
 
   const config = new DocumentBuilder()

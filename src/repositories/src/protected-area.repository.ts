@@ -13,7 +13,9 @@ export class ProtectedAreaRepository extends BaseRepository<ProtectedArea> {
     const result = await this.dataSource.query(`
       SELECT
         id,
-        sigle
+        sigle,
+        name,
+        status
       FROM public."protected_area"
       LIMIT 50;
     `);
@@ -21,11 +23,19 @@ export class ProtectedAreaRepository extends BaseRepository<ProtectedArea> {
     return result;
   }
 
+  async findOneBySigle(sigle: string) {
+    return await this.dataSource
+      .getRepository(ProtectedArea)
+      .findOneBy({ sigle });
+  }
+
   async findAllGeoJSON() {
     const result = await this.dataSource.query(`
       SELECT
         id,
         sigle,
+        name,
+        status,
         ST_AsGeoJSON(
           ST_Simplify(geometry, 0.01)
         )::json AS geometry
@@ -51,6 +61,8 @@ export class ProtectedAreaRepository extends BaseRepository<ProtectedArea> {
     SELECT
       id,
       sigle,
+      name,
+      status,
       ST_AsGeoJSON(geometry) AS geometry
     FROM public."protected_area"
     WHERE id = $1

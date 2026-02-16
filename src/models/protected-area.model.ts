@@ -16,4 +16,7 @@ export class ProtectedArea {
 
   @Column({ nullable: true, type: 'varchar' })
   name: string;
+
+  @Column({ nullable: true })
+  status: string;
 }

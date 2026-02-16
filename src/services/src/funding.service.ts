@@ -51,6 +51,7 @@ export class FundingService extends BaseService<Funding> {
     funderId: string;
     protectedAreaId: string;
     projectId?: string;
+    name?: string;
   }): Promise<Funding> {
     const validation = await this.validateFunderAndProtectedArea(
       data.funderId,
@@ -62,6 +63,8 @@ export class FundingService extends BaseService<Funding> {
       protectedArea: validation.protectedArea,
     };
     let project: Project;
+
+    if (data.name) newFunding.name = data.name;
 
     if (data.projectId) {
       const validationProject = await this.validateProject(data.projectId);

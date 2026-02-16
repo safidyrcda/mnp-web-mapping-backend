@@ -23,4 +23,16 @@ export class Funding {
     nullable: true,
   })
   project: Project;
+
+  @Column({ nullable: true, type: 'date' })
+  debut?: Date;
+
+  @Column({ nullable: true, type: 'date' })
+  end?: Date;
+
+  @Column({ nullable: true, type: 'float' })
+  amount?: number;
+
+  @Column({ nullable: true })
+  currency?: string;
 }

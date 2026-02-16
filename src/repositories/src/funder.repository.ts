@@ -8,4 +8,8 @@ export class FunderRepository extends BaseRepository<Funder> {
   constructor(dataSource: DataSource) {
     super(dataSource, Funder);
   }
+
+  async findOneByName(name: string) {
+    return this.dataSource.getRepository(Funder).findOneBy({ name });
+  }
 }

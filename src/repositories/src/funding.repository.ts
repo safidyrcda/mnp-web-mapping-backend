@@ -19,7 +19,10 @@ export class FundingRepository extends BaseRepository<Funding> {
       select: {
         id: true,
         name: true,
-
+        amount: true,
+        debut: true,
+        end: true,
+        currency: true,
         funder: {
           id: true,
           name: true,

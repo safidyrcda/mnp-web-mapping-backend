@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Patch,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param } from '@nestjs/common';
 import { ProtectedAreaService } from 'src/services/src/protected-area.service';
 import { ProtectedArea } from 'src/models/protected-area.model';
 
