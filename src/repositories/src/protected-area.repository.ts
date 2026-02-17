@@ -38,8 +38,13 @@ export class ProtectedAreaRepository extends BaseRepository<ProtectedArea> {
         status,
         ST_Area(geometry::geography) / 10000 AS size,
         ST_AsGeoJSON(
-          ST_Simplify(geometry, 0.01)
-        )::json AS geometry
+        ST_Transform(
+          ST_SimplifyPreserveTopology(
+            ST_Transform(geometry, 3857),
+            1000
+          ),
+          4326
+        ))::json AS geometry
       FROM public."protected_area"
       LIMIT 50;
     `);
