@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { FunderFunding } from './funding-funder.model';
 
 @Entity()
 export class Funder {
@@ -10,4 +11,7 @@ export class Funder {
 
   @Column({ nullable: true, type: 'text' })
   fullname: string;
+
+  @OneToMany(() => FunderFunding, (ff) => ff.funder)
+  funderFunding: FunderFunding[];
 }

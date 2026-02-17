@@ -10,6 +10,7 @@ import {
 import { FundingService } from 'src/services/src/funding.service';
 import { Funding } from 'src/models/funding.model';
 import { CreateFundingDto } from 'src/dtos/funding/create-funding.dto';
+import { UpdateFundingDto } from 'src/dtos/funding/update-funding.dto';
 
 @Controller('fundings')
 export class FundingController {
@@ -23,7 +24,7 @@ export class FundingController {
   @Get('protected-area/:protectedAreaId')
   async findAllByProtectedArea(
     @Param('protectedAreaId') protectedAreaId: string,
-  ): Promise<Funding[]> {
+  ) {
     return this.fundingService.findByProtectedArea(protectedAreaId);
   }
 
@@ -33,13 +34,21 @@ export class FundingController {
     return this.fundingService.create(data);
   }
 
-  //   @Patch(':id')
-  //   async update(
-  //     @Param('id') id: string,
-  //     @Body() data: Partial<Funding>,
-  //   ): Promise<Funding | null> {
-  //     return this.fundingService.update(id, data);
-  //   }
+  @Patch(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() data: UpdateFundingDto,
+  ): Promise<Funding | null> {
+    let debut;
+    let end;
+    if (data.debut) debut = new Date(data.debut);
+    if (data.end) end = new Date(data.end);
+    return this.fundingService.update(id, {
+      ...data,
+      debut: debut,
+      end: end,
+    });
+  }
 
   @Delete(':id')
   async delete(@Param('id') id: string): Promise<boolean> {

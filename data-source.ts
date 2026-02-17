@@ -4,6 +4,7 @@ import { Funder } from './src/models/funder.model';
 import { Funding } from './src/models/funding.model';
 import { ProtectedArea } from './src/models/protected-area.model';
 import { Project } from './src/models/project.model';
+import { FunderFunding } from './src/models/funding-funder.model';
 
 dotenv.config({ path: `.env` });
 dotenv.config();
@@ -17,7 +18,7 @@ export const AppDataSource = new DataSource({
   database: process.env.DATABASE_NAME,
   schema: 'public',
 
-  entities: [Funder, Funding, ProtectedArea, Project],
+  entities: [Funder, Funding, ProtectedArea, Project, FunderFunding],
   migrations: ['src/migrations/*.ts'],
   synchronize: false,
 });

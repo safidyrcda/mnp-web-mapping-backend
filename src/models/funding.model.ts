@@ -1,7 +1,15 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Funder } from './funder.model';
 import { ProtectedArea } from './protected-area.model';
 import { Project } from './project.model';
+import { FunderFunding } from './funding-funder.model';
 
 @Entity()
 export class Funding {
@@ -35,4 +43,10 @@ export class Funding {
 
   @Column({ nullable: true })
   currency?: string;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @OneToMany(() => FunderFunding, (ff) => ff.funding, { cascade: true })
+  funderFunding: FunderFunding[];
 }

@@ -10,7 +10,7 @@ import {
   IsDateString,
 } from 'class-validator';
 
-export class CreateFundingDto {
+export class UpdateFundingDto {
   @ApiProperty({
     example: ['123e4567-e89b-12d3-a456-426614174000'],
     description: 'IDs des bailleurs',
@@ -19,8 +19,8 @@ export class CreateFundingDto {
   })
   @IsArray()
   @IsUUID('4', { each: true })
-  @IsNotEmpty()
-  readonly funders: string[];
+  @IsOptional()
+  readonly funders?: string[];
 
   @ApiProperty({
     example: 'Nom du financement',
@@ -37,15 +37,15 @@ export class CreateFundingDto {
     required: true,
   })
   @IsUUID('4')
-  @IsNotEmpty()
-  readonly protectedAreaId: string;
+  @IsOptional()
+  readonly protectedAreaId?: string;
 
   @ApiProperty({
     example: '123e4567-e89b-12d3-a456-426614174000',
     description: 'ID du projet',
     required: false,
   })
-  @IsUUID('4')
+  @IsUUID()
   @IsOptional()
   readonly projectId?: string;
 
