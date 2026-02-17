@@ -15,7 +15,8 @@ export class ProtectedAreaRepository extends BaseRepository<ProtectedArea> {
         id,
         sigle,
         name,
-        status
+        status,
+        ST_Area(geometry::geography) / 10000 AS size
       FROM public."protected_area"
       LIMIT 50;
     `);
