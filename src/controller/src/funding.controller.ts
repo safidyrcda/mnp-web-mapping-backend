@@ -28,9 +28,15 @@ export class FundingController {
     return this.fundingService.findByProtectedArea(protectedAreaId);
   }
 
+  @Get('protected-area/:protectedAreaId/funders')
+  async findAllFundersByProtectedArea(
+    @Param('protectedAreaId') protectedAreaId: string,
+  ) {
+    return this.fundingService.findFundersByProtectedArea(protectedAreaId);
+  }
+
   @Post()
   async create(@Body() data: CreateFundingDto): Promise<Funding> {
-    console.log(data);
     return this.fundingService.create(data);
   }
 

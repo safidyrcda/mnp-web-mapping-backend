@@ -48,5 +48,5 @@ export class Funding {
   createdAt: Date;
 
   @OneToMany(() => FunderFunding, (ff) => ff.funding, { cascade: true })
-  funderFunding: FunderFunding[];
+  funderFundings: FunderFunding[];
 }

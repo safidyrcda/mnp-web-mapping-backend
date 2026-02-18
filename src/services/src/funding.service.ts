@@ -21,7 +21,7 @@ export class FundingService extends BaseService<Funding> {
     super(repository);
   }
 
-  findAll(): Promise<Funding[]> {
+  async findAll(): Promise<Funding[]> {
     return this.repository.findAllWithFunders();
   }
 
@@ -172,6 +172,26 @@ export class FundingService extends BaseService<Funding> {
     }
 
     return updatedFunding;
+  }
+
+  async findFundersByProtectedArea(protectedAreaId: string) {
+    const fundings = await this.repository.findByAPId(protectedAreaId);
+
+    const fundersMap = new Map<string, Funder>();
+
+    for (const funding of fundings) {
+      if (!funding.funderFundings) continue;
+
+      for (const funderFunding of funding.funderFundings) {
+        const funder = funderFunding.funder;
+
+        if (!fundersMap.has(funder.id)) {
+          fundersMap.set(funder.id, funder);
+        }
+      }
+    }
+
+    return Array.from(fundersMap.values());
   }
 
   findByProtectedArea(protectedAreaId: string) {
