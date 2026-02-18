@@ -22,7 +22,7 @@ export class FundingService extends BaseService<Funding> {
   }
 
   async findAll(): Promise<Funding[]> {
-    return this.repository.findAllWithFunders();
+    return this.repository.find();
   }
 
   async create(data: {
@@ -188,6 +188,22 @@ export class FundingService extends BaseService<Funding> {
         if (!fundersMap.has(funder.id)) {
           fundersMap.set(funder.id, funder);
         }
+      }
+    }
+
+    return Array.from(fundersMap.values());
+  }
+
+  async findFundersByFunding(fundingId: string) {
+    const funderFundings = await this.repository.findAllFunder(fundingId);
+
+    const fundersMap = new Map<string, Funder>();
+
+    for (const funderFunding of funderFundings) {
+      const funder = funderFunding.funder;
+
+      if (!fundersMap.has(funder.id)) {
+        fundersMap.set(funder.id, funder);
       }
     }
 

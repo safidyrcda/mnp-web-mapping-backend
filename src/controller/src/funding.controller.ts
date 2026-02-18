@@ -21,6 +21,11 @@ export class FundingController {
     return this.fundingService.findAll();
   }
 
+  @Get(':fundingId/funders')
+  async findAllFunders(@Param('fundingId') fundingId: string) {
+    return this.fundingService.findFundersByFunding(fundingId);
+  }
+
   @Get('protected-area/:protectedAreaId')
   async findAllByProtectedArea(
     @Param('protectedAreaId') protectedAreaId: string,
