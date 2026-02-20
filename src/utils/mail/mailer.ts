@@ -1,26 +1,26 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 
 @Injectable()
 export class MailService {
   private transporter;
 
-  constructor() {
+  constructor(configService: ConfigService) {
     this.transporter = nodemailer.createTransport({
-      host: 'mail.parcs-madagascar.com',
-      port: 587,
-      auth: {
-        user: 'no-reply@parcs-madagascar.com',
-        pass: 'zLhTKaJ5tNwjQeQ7dW3b',
-      },
+      host: configService.get<string>('EMAIL_HOST'),
+      port: configService.get<number>('EMAIL_PORT') || 587,
       secure: false,
-      dkim: {
-        domainName: 'parcs-madagascar.com',
-        keySelector: 'mail',
-        privateKey:
-          'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArxsVNCGYOwEvVbG1QDEHDShnio22pFAZw97bMNxMaykTI6panzKLUZ9B648NN70H5IYiIYgvSl7r0c4fDs/RBZb6PNlsmrAWv1VWMKK3hTc/PK/lsHsAs2rkgjEsoExRUFM2s3Z10obrbaRYQew5/s35iyqMUkJQYdayX5vim7BT5hHLCKkSUtT0udDLxDA+1INIIXl+3ep8CPZ8WhYX8PL411b0WPdicU5LNrZc8Tt9Jlk+V7CMaZsiYcwdG/990X1qnRCJnn/nW3oPGahF1aULHH/O3H9hMUr5CeU8+uWmtsgclJ9RBmHhtZAQwLvtf4AhYp5+W0OS9nKNWqbStwIDAQAB', // clé privée correspondante
+      auth: {
+        user: configService.get<string>('EMAIL_USER'),
+        pass: configService.get<string>('EMAIL_PASSWORD'),
       },
-    });
+      dkim: {
+        domainName: configService.get<string>('DKIM_DOMAIN_NAME'),
+        keySelector: configService.get<string>('DKIM_SELECTOR'),
+        privateKey: configService.get<string>('DKIM_PRIVATE_KEY'),
+      },
+    } as nodemailer.TransportOptions);
   }
 
   async sendEmailConfirmation(email: string, token: string) {
