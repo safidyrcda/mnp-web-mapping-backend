@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { BaseService } from '../base.service';
-import { Project } from 'src/models/project.model';
-import { ProjectRepository } from 'src/repositories/src/project.repository';
+import { Project } from 'src/infrastructure/models/project.model';
+import { ProjectRepository } from 'src/infrastructure/repositories/src/project.repository';
 
 @Injectable()
 export class ProjectService extends BaseService<Project> {

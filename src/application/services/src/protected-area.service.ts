@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { BaseService } from '../base.service';
-import { ProtectedAreaRepository } from 'src/repositories/src/protected-area.repository';
-import { ProtectedArea } from 'src/models/protected-area.model';
+import { ProtectedAreaRepository } from 'src/infrastructure/repositories/src/protected-area.repository';
+import { ProtectedArea } from 'src/infrastructure/models/protected-area.model';
 
 @Injectable()
 export class ProtectedAreaService extends BaseService<ProtectedArea> {

@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { BaseRepository } from '../base.repository';
-import { Funder } from 'src/models/funder.model';
-import { FunderFunding } from 'src/models/funding-funder.model';
+import { Funder } from 'src/infrastructure/models/funder.model';
+import { FunderFunding } from 'src/infrastructure/models/funding-funder.model';
 
 @Injectable()
 export class FunderRepository extends BaseRepository<Funder> {

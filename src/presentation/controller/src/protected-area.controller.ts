@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param } from '@nestjs/common';
-import { ProtectedAreaService } from 'src/services/src/protected-area.service';
-import { ProtectedArea } from 'src/models/protected-area.model';
+import { ProtectedAreaService } from 'src/application/services/src/protected-area.service';
+import { ProtectedArea } from 'src/infrastructure/models/protected-area.model';
 
 @Controller('protected-areas')
 export class ProtectedAreaController {

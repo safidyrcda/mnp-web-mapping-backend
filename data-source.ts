@@ -1,10 +1,10 @@
 import * as dotenv from 'dotenv';
 import { DataSource } from 'typeorm';
-import { Funder } from './src/models/funder.model';
-import { Funding } from './src/models/funding.model';
-import { ProtectedArea } from './src/models/protected-area.model';
-import { Project } from './src/models/project.model';
-import { FunderFunding } from './src/models/funding-funder.model';
+import { Funder } from './src/infrastructure/models/funder.model';
+import { Funding } from './src/infrastructure/models/funding.model';
+import { ProtectedArea } from './src/infrastructure/models/protected-area.model';
+import { Project } from './src/infrastructure/models/project.model';
+import { FunderFunding } from './src/infrastructure/models/funding-funder.model';
 
 dotenv.config({ path: `.env` });
 dotenv.config();
@@ -19,6 +19,6 @@ export const AppDataSource = new DataSource({
   schema: 'public',
 
   entities: [Funder, Funding, ProtectedArea, Project, FunderFunding],
-  migrations: ['src/migrations/*.ts'],
+  migrations: ['src/infrastructure/migrations/*.ts'],
   synchronize: false,
 });

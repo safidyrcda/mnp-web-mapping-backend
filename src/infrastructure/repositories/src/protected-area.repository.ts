@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { BaseRepository } from '../base.repository';
-import { ProtectedArea } from 'src/models/protected-area.model';
+import { ProtectedArea } from 'src/infrastructure/models/protected-area.model';
 
 @Injectable()
 export class ProtectedAreaRepository extends BaseRepository<ProtectedArea> {

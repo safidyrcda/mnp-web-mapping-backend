@@ -1,4 +1,4 @@
-import { BaseRepository } from '../repositories/base.repository';
+import { BaseRepository } from '../../infrastructure/repositories/base.repository';
 
 export abstract class BaseService<T extends object> {
   constructor(protected repository: BaseRepository<T>) {}

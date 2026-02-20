@@ -7,10 +7,10 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { FundingService } from 'src/services/src/funding.service';
-import { Funding } from 'src/models/funding.model';
-import { CreateFundingDto } from 'src/dtos/funding/create-funding.dto';
-import { UpdateFundingDto } from 'src/dtos/funding/update-funding.dto';
+import { FundingService } from 'src/application/services/src/funding.service';
+import { Funding } from 'src/infrastructure/models/funding.model';
+import { CreateFundingDto } from 'src/presentation/dtos/funding/create-funding.dto';
+import { UpdateFundingDto } from 'src/presentation/dtos/funding/update-funding.dto';
 
 @Controller('fundings')
 export class FundingController {

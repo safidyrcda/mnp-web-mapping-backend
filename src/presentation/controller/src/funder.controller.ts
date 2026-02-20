@@ -7,9 +7,9 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { FunderService } from 'src/services/src/funder.service';
-import { Funder } from 'src/models/funder.model';
-import { CreateFunderDto } from 'src/dtos/funder/create-funder.dto';
+import { FunderService } from 'src/application/services/src/funder.service';
+import { Funder } from 'src/infrastructure/models/funder.model';
+import { CreateFunderDto } from 'src/presentation/dtos/funder/create-funder.dto';
 
 @Controller('funders')
 export class FunderController {

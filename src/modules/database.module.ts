@@ -1,12 +1,12 @@
 import { Global, Module } from '@nestjs/common';
 
-import { ProtectedArea } from '../models/protected-area.model';
-import { Funder } from 'src/models/funder.model';
-import { Funding } from 'src/models/funding.model';
+import { ProtectedArea } from '../infrastructure/models/protected-area.model';
+import { Funder } from 'src/infrastructure/models/funder.model';
+import { Funding } from 'src/infrastructure/models/funding.model';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { Project } from 'src/models/project.model';
-import { FunderFunding } from 'src/models/funding-funder.model';
+import { Project } from 'src/infrastructure/models/project.model';
+import { FunderFunding } from 'src/infrastructure/models/funding-funder.model';
 
 @Global()
 @Module({

@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { BaseService } from '../base.service';
-import { Funding } from 'src/models/funding.model';
-import { FundingRepository } from 'src/repositories/src/funding.repository';
-import { FunderRepository } from 'src/repositories/src/funder.repository';
-import { ProtectedAreaRepository } from 'src/repositories/src/protected-area.repository';
-import { ProjectRepository } from 'src/repositories/src/project.repository';
-import { Project } from 'src/models/project.model';
-import { FunderFundingRepository } from 'src/repositories/src/funder-funding.repository';
-import { Funder } from 'src/models/funder.model';
+import { Funding } from 'src/infrastructure/models/funding.model';
+import { FundingRepository } from 'src/infrastructure/repositories/src/funding.repository';
+import { FunderRepository } from 'src/infrastructure/repositories/src/funder.repository';
+import { ProtectedAreaRepository } from 'src/infrastructure/repositories/src/protected-area.repository';
+import { ProjectRepository } from 'src/infrastructure/repositories/src/project.repository';
+import { Project } from 'src/infrastructure/models/project.model';
+import { FunderFundingRepository } from 'src/infrastructure/repositories/src/funder-funding.repository';
+import { Funder } from 'src/infrastructure/models/funder.model';
 
 @Injectable()
 export class FundingService extends BaseService<Funding> {
