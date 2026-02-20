@@ -36,6 +36,7 @@ export default tseslint.config(
       '@typescript-eslint/restrict-template-expressions': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
       'prettier/prettier': ['error', { endOfLine: 'auto' }],
+      '@typescript-eslint/require-await': 'off',
     },
   },
 );

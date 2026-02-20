@@ -7,6 +7,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Project } from 'src/infrastructure/models/project.model';
 import { FunderFunding } from 'src/infrastructure/models/funding-funder.model';
+import { User } from 'src/infrastructure/models/auth/user.model';
+import { UserRole } from 'src/infrastructure/models/auth/user-role.model';
+import { Role } from 'src/infrastructure/models/auth/role.model';
+import { PasswordResetToken } from 'src/infrastructure/models/auth/password-reset-token.model';
+import { EmailVerificationToken } from 'src/infrastructure/models/auth/email-verification-token.model';
 
 @Global()
 @Module({
@@ -21,7 +26,18 @@ import { FunderFunding } from 'src/infrastructure/models/funding-funder.model';
         password: configService.get<string>('DATABASE_PASSWORD'),
         database: configService.get('DATABASE_NAME'),
         schema: 'public',
-        entities: [Funder, Funding, ProtectedArea, Project, FunderFunding],
+        entities: [
+          Funder,
+          Funding,
+          ProtectedArea,
+          Project,
+          FunderFunding,
+          User,
+          UserRole,
+          Role,
+          PasswordResetToken,
+          EmailVerificationToken,
+        ],
         synchronize: false,
       }),
       inject: [ConfigService],

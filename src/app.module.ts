@@ -5,6 +5,7 @@ import { FunderModule } from './modules/funder.module';
 import { FundingModule } from './modules/funding.module';
 import { ConfigModule } from '@nestjs/config';
 import { ProjectModule } from './modules/project.module';
+import { AuthModule } from './modules/auth.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { ProjectModule } from './modules/project.module';
     FunderModule,
     FundingModule,
     ProjectModule,
+    AuthModule,
   ],
   controllers: [],
 
