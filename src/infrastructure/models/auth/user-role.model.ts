@@ -3,6 +3,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  PrimaryColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { User } from './user.model';
@@ -10,7 +11,10 @@ import { Role } from './role.model';
 
 @Entity('user_roles')
 export class UserRole {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn({
+    type: 'uuid',
+    default: () => 'gen_random_uuid()',
+  })
   id: string;
 
   @ManyToOne(() => User, (user) => user.id)

@@ -5,6 +5,7 @@ import {
   BeforeInsert,
   OneToMany,
   BeforeUpdate,
+  PrimaryColumn,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { UserRole } from './user-role.model';
@@ -13,7 +14,10 @@ import { EmailVerificationToken } from './email-verification-token.model';
 
 @Entity('users')
 export class User {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn({
+    type: 'uuid',
+    default: () => 'gen_random_uuid()',
+  })
   id: string;
 
   @Column({ unique: true })

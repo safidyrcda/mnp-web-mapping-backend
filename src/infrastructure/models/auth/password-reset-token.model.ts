@@ -1,16 +1,20 @@
 import {
   Entity,
   Column,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   ManyToOne,
   CreateDateColumn,
   Index,
+  Generated,
 } from 'typeorm';
 import { User } from './user.model';
 
 @Entity({ name: 'password_reset_tokens' })
 export class PasswordResetToken {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn({
+    type: 'uuid',
+    default: () => 'gen_random_uuid()',
+  })
   id: string;
 
   @ManyToOne(() => User, (user) => user.passwordResetTokens, {

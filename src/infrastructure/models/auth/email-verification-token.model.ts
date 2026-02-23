@@ -5,12 +5,16 @@ import {
   ManyToOne,
   CreateDateColumn,
   Index,
+  PrimaryColumn,
 } from 'typeorm';
 import { User } from './user.model';
 
 @Entity({ name: 'email_verification_tokens' })
 export class EmailVerificationToken {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn({
+    type: 'uuid',
+    default: () => 'gen_random_uuid()',
+  })
   id: string;
 
   @ManyToOne(() => User, (user) => user.emailVerificationTokens, {
