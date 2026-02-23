@@ -28,7 +28,12 @@ export class AuthService {
 
     const token = randomBytes(32).toString('hex');
 
-    this.authRepository.createEmailVerficationToken(user, token);
+    const res = await this.authRepository.createEmailVerficationToken(
+      user,
+      token,
+    );
+
+    console.log(res);
 
     await this.mailService.sendEmailConfirmation(email, token);
 
@@ -66,7 +71,7 @@ export class AuthService {
 
     const token = randomBytes(32).toString('hex');
 
-    const resetToken = this.authRepository.createPasswordResetToken(
+    const resetToken = await this.authRepository.createPasswordResetToken(
       user,
       token,
     );

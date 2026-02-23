@@ -20,18 +20,28 @@ export class AuthRepository extends Repository<User> {
     return this.findOne({ where: { email } });
   }
 
-  createEmailVerficationToken(user: User, token: string) {
+  createEmailVerficationToken(
+    user: User,
+    token: string,
+  ): Promise<EmailVerificationToken> {
     const emailToken = this.emailVerificationTokenDataSource.getRepository(
       EmailVerificationToken,
     );
     const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24);
-    return emailToken.create({ user, token, expiresAt });
+    const newEmailToken = emailToken.create({ user, token, expiresAt });
+    return emailToken.save(newEmailToken);
   }
 
-  createPasswordResetToken(user: User, token: string) {
+  createPasswordResetToken(
+    user: User,
+    token: string,
+  ): Promise<PasswordResetToken> {
     const emailToken =
       this.passwordResetTokenDataSource.getRepository(PasswordResetToken);
-    return emailToken.create({ user, token });
+
+    const newToken = emailToken.create({ user, token });
+
+    return emailToken.save(newToken);
   }
 
   async markPasswordResetTokenAsUsed(token: string): Promise<void> {

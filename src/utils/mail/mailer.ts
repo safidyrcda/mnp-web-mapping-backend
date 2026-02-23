@@ -6,24 +6,28 @@ import * as nodemailer from 'nodemailer';
 export class MailService {
   private transporter;
 
-  constructor(configService: ConfigService) {
+  constructor(private configService: ConfigService) {
     this.transporter = nodemailer.createTransport({
-      host: configService.get<string>('EMAIL_HOST'),
-      port: configService.get<number>('EMAIL_PORT') || 587,
+      host: this.configService.get<string>('EMAIL_HOST'),
+      port: this.configService.get<number>('EMAIL_PORT') || 587,
       secure: false,
       auth: {
-        user: configService.get<string>('EMAIL_USER'),
-        pass: configService.get<string>('EMAIL_PASSWORD'),
+        user: this.configService.get<string>('EMAIL_USER'),
+        pass: this.configService.get<string>('EMAIL_PASSWORD'),
       },
       dkim: {
-        domainName: configService.get<string>('DKIM_DOMAIN_NAME'),
-        keySelector: configService.get<string>('DKIM_SELECTOR'),
-        privateKey: configService.get<string>('DKIM_PRIVATE_KEY'),
+        domainName: this.configService.get<string>('DKIM_DOMAIN_NAME'),
+        keySelector: this.configService.get<string>('DKIM_SELECTOR'),
+        privateKey: this.configService.get<string>('DKIM_PRIVATE_KEY'),
       },
     } as nodemailer.TransportOptions);
   }
 
   async sendEmailConfirmation(email: string, token: string) {
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL');
+
+    const url = `${frontendUrl}/auth/verify?token=${token}`;
+    console.log(url);
     await this.transporter.sendMail({
       from: '"No Reply" <no-reply@parcs-madagascar.com>',
       to: email,
@@ -31,7 +35,7 @@ export class MailService {
       html: `
       <p>Hello!</p>
       <p>Please confirm your email by clicking the link below:</p>
-      <p><a href="${token}">Confirm Email</a></p>
+      <p><a href="${frontendUrl}/auth/verify?token=${token}">Confirm Email</a></p>
       <p>Thank you,<br/>Parcs Madagascar Team</p>
     `,
     });

@@ -14,6 +14,7 @@ export class AuthController {
   @Post('register')
   @ApiOperation({ summary: 'Register a new user' })
   async register(@Body() dto: RegisterDto) {
+    console.log(dto);
     return this.authService.register(dto.email, dto.password);
   }
 
@@ -23,10 +24,9 @@ export class AuthController {
     return this.authService.login(dto.email, dto.password);
   }
 
-  @Post('confirm')
+  @Post('confirm/token/:token')
   @ApiOperation({ summary: 'Confirm user email' })
-  @ApiQuery({ name: 'token', required: true })
-  async confirm(@Query('token') token: string) {
+  async confirm(@Param('token') token: string) {
     return this.authService.confirmEmail(token);
   }
 
