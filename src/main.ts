@@ -5,15 +5,6 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  console.log('Environment Variables:', {
-    LISTEN_PORT: process.env.LISTEN_PORT,
-    DATABASE_USER: process.env.DATABASE_USER ? '***' : 'non défini',
-    DATABASE_PASSWORD: process.env.DATABASE_PASSWORD ? '***' : 'non défini',
-    DATABASE_HOST: process.env.DATABASE_HOST,
-    DATABASE_NAME: process.env.DATABASE_NAME,
-    DATABASE_LISTEN_PORT: process.env.DATABASE_LISTEN_PORT,
-  });
-
   const config = new DocumentBuilder()
     .setTitle('MNP Funding API')
     .setDescription('API Of the MNP Funding')

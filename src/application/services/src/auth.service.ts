@@ -5,8 +5,10 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { randomBytes } from 'crypto';
+import { AuthRepository } from 'src/infrastructure/repositories/src/auth/auth.repository';
 import { UserRepository } from 'src/infrastructure/repositories/src/user.repository';
 import { MailService } from 'src/utils/mail/mailer';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -14,6 +16,7 @@ export class AuthService {
     private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
     private readonly mailService: MailService,
+    private readonly authRepository: AuthRepository,
   ) {}
 
   async register(email: string, password: string) {
@@ -23,13 +26,17 @@ export class AuthService {
     const user = this.userRepository.create({ email, password });
     await this.userRepository.save(user);
 
-    const token = this.jwtService.sign({ email }, { expiresIn: '1d' });
+    const token = randomBytes(32).toString('hex');
+
+    this.authRepository.createEmailVerficationToken(user, token);
+
     await this.mailService.sendEmailConfirmation(email, token);
 
     return { message: 'User created. Please confirm your email.' };
   }
 
   async login(email: string, password: string) {
+    console.log(email, password);
     const user = await this.userRepository.findByEmail(email);
     if (!user) throw new NotFoundException('User not found');
 
@@ -45,15 +52,11 @@ export class AuthService {
 
   async confirmEmail(token: string) {
     try {
-      const payload: any = this.jwtService.verify(token);
-      const user = await this.userRepository.findByEmail(payload.email);
-      if (!user) throw new NotFoundException('User not found');
+      await this.authRepository.verifyEmailToken(token);
 
-      user.isEmailConfirmed = true;
-      await this.userRepository.save(user);
-      return { message: 'Email confirmed' };
-    } catch {
-      throw new BadRequestException('Invalid or expired token');
+      return { message: 'Email confirmed successfully' };
+    } catch (error) {
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -62,18 +65,36 @@ export class AuthService {
     if (!user) throw new NotFoundException('User not found');
 
     const token = randomBytes(32).toString('hex');
-    // here you could store the token in DB with expiration, omitted for brevity
+
+    const resetToken = this.authRepository.createPasswordResetToken(
+      user,
+      token,
+    );
+
+    resetToken.expiresAt = new Date(Date.now() + 1000 * 60 * 60); // 1h
+
+    await this.userRepository.manager.save(resetToken);
+
     await this.mailService.sendForgotPassword(email, token);
 
     return { message: 'Password reset email sent' };
   }
 
-  async resetPassword(email: string, newPassword: string) {
-    const user = await this.userRepository.findByEmail(email);
-    if (!user) throw new NotFoundException('User not found');
+  async resetPassword(token: string, newPassword: string) {
+    try {
+      const user = await this.authRepository.verifyPasswordResetToken(token);
 
-    user.password = newPassword;
-    await this.userRepository.save(user);
-    return { message: 'Password updated successfully' };
+      const password = await bcrypt.hash(newPassword, 10);
+
+      user.password = password;
+
+      await this.userRepository.save(user);
+
+      await this.authRepository.markPasswordResetTokenAsUsed(token);
+
+      return { message: 'Password updated successfully' };
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 }

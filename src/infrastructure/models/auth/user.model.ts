@@ -4,6 +4,7 @@ import {
   PrimaryGeneratedColumn,
   BeforeInsert,
   OneToMany,
+  BeforeUpdate,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { UserRole } from './user-role.model';
@@ -23,9 +24,6 @@ export class User {
 
   @Column({ default: false })
   isEmailConfirmed: boolean;
-
-  @Column({ nullable: true })
-  emailConfirmationToken: string;
 
   @OneToMany(() => UserRole, (userRole) => userRole.user)
   userRoles: UserRole[];

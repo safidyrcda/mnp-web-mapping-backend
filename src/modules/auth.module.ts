@@ -7,6 +7,7 @@ import { PasswordResetToken } from 'src/infrastructure/models/auth/password-rese
 import { Role } from 'src/infrastructure/models/auth/role.model';
 import { UserRole } from 'src/infrastructure/models/auth/user-role.model';
 import { User } from 'src/infrastructure/models/auth/user.model';
+import { AuthRepository } from 'src/infrastructure/repositories/src/auth/auth.repository';
 import { UserRepository } from 'src/infrastructure/repositories/src/user.repository';
 import { AuthController } from 'src/presentation/controller/src/auth.controller';
 import { MailService } from 'src/utils/mail/mailer';
@@ -26,7 +27,7 @@ import { MailService } from 'src/utils/mail/mailer';
       signOptions: { expiresIn: '1h' },
     }),
   ],
-  providers: [AuthService, UserRepository, MailService],
+  providers: [AuthService, UserRepository, MailService, AuthRepository],
   controllers: [AuthController],
   exports: [AuthService],
 })
