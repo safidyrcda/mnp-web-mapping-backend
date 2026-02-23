@@ -33,15 +33,12 @@ export class AuthService {
       token,
     );
 
-    console.log(res);
-
     await this.mailService.sendEmailConfirmation(email, token);
 
     return { message: 'User created. Please confirm your email.' };
   }
 
   async login(email: string, password: string) {
-    console.log(email, password);
     const user = await this.userRepository.findByEmail(email);
     if (!user) throw new NotFoundException('User not found');
 

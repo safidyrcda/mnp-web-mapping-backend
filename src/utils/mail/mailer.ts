@@ -27,7 +27,7 @@ export class MailService {
     const frontendUrl = this.configService.get<string>('FRONTEND_URL');
 
     const url = `${frontendUrl}/auth/verify?token=${token}`;
-    console.log(url);
+
     await this.transporter.sendMail({
       from: '"No Reply" <no-reply@parcs-madagascar.com>',
       to: email,
@@ -35,7 +35,7 @@ export class MailService {
       html: `
       <p>Hello!</p>
       <p>Please confirm your email by clicking the link below:</p>
-      <p><a href="${frontendUrl}/auth/verify?token=${token}">Confirm Email</a></p>
+      <p><a href="${url}">Confirm Email</a></p>
       <p>Thank you,<br/>Parcs Madagascar Team</p>
     `,
     });
