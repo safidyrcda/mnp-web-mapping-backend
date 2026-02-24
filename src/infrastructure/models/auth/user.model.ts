@@ -6,6 +6,8 @@ import {
   OneToMany,
   BeforeUpdate,
   PrimaryColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { UserRole } from './user-role.model';
@@ -31,6 +33,12 @@ export class User {
 
   @OneToMany(() => UserRole, (userRole) => userRole.user)
   userRoles: UserRole[];
+
+  @CreateDateColumn({ type: 'timestamp' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamp' })
+  updatedAt: Date;
 
   @OneToMany(() => EmailVerificationToken, (token) => token.user)
   emailVerificationTokens: EmailVerificationToken[];

@@ -73,10 +73,6 @@ export class AuthService {
       token,
     );
 
-    resetToken.expiresAt = new Date(Date.now() + 1000 * 60 * 60); // 1h
-
-    await this.userRepository.manager.save(resetToken);
-
     await this.mailService.sendForgotPassword(email, token);
 
     return { message: 'Password reset email sent' };

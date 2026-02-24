@@ -42,11 +42,18 @@ export class MailService {
   }
 
   async sendForgotPassword(email: string, token: string) {
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL');
+
+    const url = `${frontendUrl}/auth/reset-password?token=${token}`;
+
     await this.transporter.sendMail({
       from: '"No Reply" <no-reply@parcs-madagascar.com>',
       to: email,
       subject: 'Reset your password',
-      html: `<p>Reset your password with token: <b>${token}</b></p>`,
+      html: ` <p>Hello!</p>
+      <p>Please reset your password by clicking the link below:</p>
+      <p><a href="${url}">Reset Password</a></p>
+      <p>Thank you,<br/>Parcs Madagascar Team</p>`,
     });
   }
 }

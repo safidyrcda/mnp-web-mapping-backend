@@ -39,7 +39,11 @@ export class AuthRepository extends Repository<User> {
     const emailToken =
       this.passwordResetTokenDataSource.getRepository(PasswordResetToken);
 
-    const newToken = emailToken.create({ user, token });
+    const newToken = emailToken.create({
+      user,
+      token,
+      expiresAt: new Date(Date.now() + 1000 * 60 * 60),
+    });
 
     return emailToken.save(newToken);
   }
