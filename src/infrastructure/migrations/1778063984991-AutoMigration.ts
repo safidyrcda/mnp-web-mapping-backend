@@ -22,9 +22,27 @@ export class AutoMigration1778063984991 implements MigrationInterface {
     await queryRunner.query(
       `CREATE TABLE "public"."activity_funding" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "activityId" uuid NOT NULL, "fundingId" uuid NOT NULL, CONSTRAINT "PK_53f220dd7199afc74d23650fc50" PRIMARY KEY ("id"))`,
     );
-    // funder_funding, roles, user_roles, password_reset_tokens, email_verification_tokens, users
-    // already exist from prior migrations — skip their CREATE TABLE statements
-
+    await queryRunner.query(
+      `CREATE TABLE "public"."funder_funding" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "funderId" uuid, "fundingId" uuid, CONSTRAINT "PK_aa58afc2c2d35e3116474d10bf8" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "public"."roles" ("id" uuid NOT NULL DEFAULT gen_random_uuid(), "name" character varying NOT NULL, "description" character varying NOT NULL, CONSTRAINT "UQ_648e3f5447f725579d7d4ffdfb7" UNIQUE ("name"), CONSTRAINT "PK_c1433d71a4838793a49dcad46ab" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "public"."user_roles" ("id" uuid NOT NULL DEFAULT gen_random_uuid(), "userId" uuid, "roleId" uuid, CONSTRAINT "PK_8acd5cf26ebd158416f477de799" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "public"."password_reset_tokens" ("id" uuid NOT NULL DEFAULT gen_random_uuid(), "token" text NOT NULL, "expiresAt" TIMESTAMP NOT NULL, "used" boolean NOT NULL DEFAULT false, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "userId" uuid, CONSTRAINT "PK_d16bebd73e844c48bca50ff8d3d" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "public"."email_verification_tokens" ("id" uuid NOT NULL DEFAULT gen_random_uuid(), "token" text NOT NULL, "expiresAt" TIMESTAMP NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "used" boolean NOT NULL DEFAULT false, "userId" uuid, CONSTRAINT "PK_417a095bbed21c2369a6a01ab9a" PRIMARY KEY ("id"))`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_0b28b18b8416ccc1c593f55ce1" ON "public"."email_verification_tokens" ("used") `,
+    );
+    await queryRunner.query(
+      `CREATE TABLE "public"."users" ("id" uuid NOT NULL DEFAULT gen_random_uuid(), "email" character varying NOT NULL, "password" character varying NOT NULL, "isEmailConfirmed" boolean NOT NULL DEFAULT false, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "UQ_97672ac88f789774dd47f7c8be3" UNIQUE ("email"), CONSTRAINT "PK_a3ffb1c0c8416b9fc6f907b7433" PRIMARY KEY ("id"))`,
+    );
     await queryRunner.query(
       `ALTER TABLE "public"."funding" DROP COLUMN "funderId"`,
     );
@@ -34,14 +52,12 @@ export class AutoMigration1778063984991 implements MigrationInterface {
     await queryRunner.query(
       `ALTER TABLE "public"."funding" ADD "amountInEuro" double precision`,
     );
-    // "createdAt" on funding was added in AutoMigration1771330881953, skip it too
-    // await queryRunner.query(`ALTER TABLE "public"."funding" ADD "createdAt" TIMESTAMP NOT NULL DEFAULT now()`);
-
+    await queryRunner.query(
+      `ALTER TABLE "public"."funding" ADD "createdAt" TIMESTAMP NOT NULL DEFAULT now()`,
+    );
     await queryRunner.query(
       `ALTER TABLE "public"."protected_area" ALTER COLUMN "geometry" TYPE geometry`,
     );
-
-    // Add constraints for new tables only
     await queryRunner.query(
       `ALTER TABLE "public"."protected_area_funding" ADD CONSTRAINT "FK_aeb3af89991a1d666f8306d9a24" FOREIGN KEY ("protectedAreaId") REFERENCES "public"."protected_area"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
@@ -57,7 +73,24 @@ export class AutoMigration1778063984991 implements MigrationInterface {
     await queryRunner.query(
       `ALTER TABLE "public"."activity_funding" ADD CONSTRAINT "FK_932dbe5aaf9a9e834ae58468c95" FOREIGN KEY ("fundingId") REFERENCES "public"."funding"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
     );
-    // funder_funding FK was already added in AutoMigration1771327625786, skip it
+    await queryRunner.query(
+      `ALTER TABLE "public"."funder_funding" ADD CONSTRAINT "FK_12d8a4414b4c5a9c309e71f769e" FOREIGN KEY ("funderId") REFERENCES "public"."funder"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "public"."funder_funding" ADD CONSTRAINT "FK_9b5f2938c690aeed03e2bcff01b" FOREIGN KEY ("fundingId") REFERENCES "public"."funding"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "public"."user_roles" ADD CONSTRAINT "FK_472b25323af01488f1f66a06b67" FOREIGN KEY ("userId") REFERENCES "public"."users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "public"."user_roles" ADD CONSTRAINT "FK_86033897c009fcca8b6505d6be2" FOREIGN KEY ("roleId") REFERENCES "public"."roles"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "public"."password_reset_tokens" ADD CONSTRAINT "FK_d6a19d4b4f6c62dcd29daa497e2" FOREIGN KEY ("userId") REFERENCES "public"."users"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "public"."email_verification_tokens" ADD CONSTRAINT "FK_10f285d038feb767bf7c2da14b3" FOREIGN KEY ("userId") REFERENCES "public"."users"("id") ON DELETE CASCADE ON UPDATE NO ACTION`,
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
