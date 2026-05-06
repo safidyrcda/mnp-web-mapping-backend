@@ -1,54 +1,91 @@
-import { MigrationInterface, QueryRunner } from "typeorm";
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class AutoMigration1778069195860 implements MigrationInterface {
-    name = 'AutoMigration1778069195860'
+  name = 'AutoMigration1778069195860';
 
-    public async up(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`ALTER TABLE "public"."funder_funding" DROP CONSTRAINT "FK_9b5f2938c690aeed03e2bcff01b"`);
-        await queryRunner.query(`ALTER TABLE "public"."protected_area" ALTER COLUMN "geometry" TYPE geometry`);
-        await queryRunner.query(`ALTER TABLE "public"."user_roles" DROP CONSTRAINT "FK_86033897c009fcca8b6505d6be2"`);
-        await queryRunner.query(`ALTER TABLE "public"."roles" ALTER COLUMN "id" DROP DEFAULT`);
-        await queryRunner.query(`ALTER TABLE "public"."roles" ALTER COLUMN "id" SET DEFAULT gen_random_uuid()`);
-        await queryRunner.query(`ALTER TABLE "public"."user_roles" ALTER COLUMN "id" DROP DEFAULT`);
-        await queryRunner.query(`ALTER TABLE "public"."user_roles" ALTER COLUMN "id" SET DEFAULT gen_random_uuid()`);
-        await queryRunner.query(`ALTER TABLE "public"."password_reset_tokens" ALTER COLUMN "id" DROP DEFAULT`);
-        await queryRunner.query(`ALTER TABLE "public"."password_reset_tokens" ALTER COLUMN "id" SET DEFAULT gen_random_uuid()`);
-        await queryRunner.query(`ALTER TABLE "public"."email_verification_tokens" ALTER COLUMN "id" DROP DEFAULT`);
-        await queryRunner.query(`ALTER TABLE "public"."email_verification_tokens" ALTER COLUMN "id" SET DEFAULT gen_random_uuid()`);
-        await queryRunner.query(`ALTER TABLE "public"."user_roles" DROP CONSTRAINT "FK_472b25323af01488f1f66a06b67"`);
-        await queryRunner.query(`ALTER TABLE "public"."password_reset_tokens" DROP CONSTRAINT "FK_d6a19d4b4f6c62dcd29daa497e2"`);
-        await queryRunner.query(`ALTER TABLE "public"."email_verification_tokens" DROP CONSTRAINT "FK_10f285d038feb767bf7c2da14b3"`);
-        await queryRunner.query(`ALTER TABLE "public"."users" ALTER COLUMN "id" DROP DEFAULT`);
-        await queryRunner.query(`ALTER TABLE "public"."users" ALTER COLUMN "id" SET DEFAULT gen_random_uuid()`);
-        await queryRunner.query(`ALTER TABLE "public"."funder_funding" ADD CONSTRAINT "FK_9b5f2938c690aeed03e2bcff01b" FOREIGN KEY ("fundingId") REFERENCES "public"."funding"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "public"."user_roles" ADD CONSTRAINT "FK_472b25323af01488f1f66a06b67" FOREIGN KEY ("userId") REFERENCES "public"."users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "public"."user_roles" ADD CONSTRAINT "FK_86033897c009fcca8b6505d6be2" FOREIGN KEY ("roleId") REFERENCES "public"."roles"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "public"."password_reset_tokens" ADD CONSTRAINT "FK_d6a19d4b4f6c62dcd29daa497e2" FOREIGN KEY ("userId") REFERENCES "public"."users"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "public"."email_verification_tokens" ADD CONSTRAINT "FK_10f285d038feb767bf7c2da14b3" FOREIGN KEY ("userId") REFERENCES "public"."users"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
-    }
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(
+      `ALTER TABLE "public"."protected_area" ALTER COLUMN "geometry" TYPE geometry`,
+    );
 
-    public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`ALTER TABLE "public"."email_verification_tokens" DROP CONSTRAINT "FK_10f285d038feb767bf7c2da14b3"`);
-        await queryRunner.query(`ALTER TABLE "public"."password_reset_tokens" DROP CONSTRAINT "FK_d6a19d4b4f6c62dcd29daa497e2"`);
-        await queryRunner.query(`ALTER TABLE "public"."user_roles" DROP CONSTRAINT "FK_86033897c009fcca8b6505d6be2"`);
-        await queryRunner.query(`ALTER TABLE "public"."user_roles" DROP CONSTRAINT "FK_472b25323af01488f1f66a06b67"`);
-        await queryRunner.query(`ALTER TABLE "public"."funder_funding" DROP CONSTRAINT "FK_9b5f2938c690aeed03e2bcff01b"`);
-        await queryRunner.query(`ALTER TABLE "public"."users" ALTER COLUMN "id" DROP DEFAULT`);
-        await queryRunner.query(`ALTER TABLE "public"."users" ALTER COLUMN "id" SET DEFAULT uuid_generate_v4()`);
-        await queryRunner.query(`ALTER TABLE "public"."email_verification_tokens" ADD CONSTRAINT "FK_10f285d038feb767bf7c2da14b3" FOREIGN KEY ("userId") REFERENCES "public"."users"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "public"."password_reset_tokens" ADD CONSTRAINT "FK_d6a19d4b4f6c62dcd29daa497e2" FOREIGN KEY ("userId") REFERENCES "public"."users"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "public"."user_roles" ADD CONSTRAINT "FK_472b25323af01488f1f66a06b67" FOREIGN KEY ("userId") REFERENCES "public"."users"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "public"."email_verification_tokens" ALTER COLUMN "id" DROP DEFAULT`);
-        await queryRunner.query(`ALTER TABLE "public"."email_verification_tokens" ALTER COLUMN "id" SET DEFAULT uuid_generate_v4()`);
-        await queryRunner.query(`ALTER TABLE "public"."password_reset_tokens" ALTER COLUMN "id" DROP DEFAULT`);
-        await queryRunner.query(`ALTER TABLE "public"."password_reset_tokens" ALTER COLUMN "id" SET DEFAULT uuid_generate_v4()`);
-        await queryRunner.query(`ALTER TABLE "public"."user_roles" ALTER COLUMN "id" DROP DEFAULT`);
-        await queryRunner.query(`ALTER TABLE "public"."user_roles" ALTER COLUMN "id" SET DEFAULT uuid_generate_v4()`);
-        await queryRunner.query(`ALTER TABLE "public"."roles" ALTER COLUMN "id" DROP DEFAULT`);
-        await queryRunner.query(`ALTER TABLE "public"."roles" ALTER COLUMN "id" SET DEFAULT uuid_generate_v4()`);
-        await queryRunner.query(`ALTER TABLE "public"."user_roles" ADD CONSTRAINT "FK_86033897c009fcca8b6505d6be2" FOREIGN KEY ("roleId") REFERENCES "public"."roles"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "public"."protected_area" ALTER COLUMN "geometry" TYPE geometry(GEOMETRY,0)`);
-        await queryRunner.query(`ALTER TABLE "public"."funder_funding" ADD CONSTRAINT "FK_9b5f2938c690aeed03e2bcff01b" FOREIGN KEY ("fundingId") REFERENCES "public"."funding"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
-    }
+    // Passage de uuid_generate_v4() à gen_random_uuid() pour les tables auth
+    await queryRunner.query(
+      `ALTER TABLE "public"."roles" ALTER COLUMN "id" DROP DEFAULT`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "public"."roles" ALTER COLUMN "id" SET DEFAULT gen_random_uuid()`,
+    );
 
+    await queryRunner.query(
+      `ALTER TABLE "public"."user_roles" ALTER COLUMN "id" DROP DEFAULT`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "public"."user_roles" ALTER COLUMN "id" SET DEFAULT gen_random_uuid()`,
+    );
+
+    await queryRunner.query(
+      `ALTER TABLE "public"."password_reset_tokens" ALTER COLUMN "id" DROP DEFAULT`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "public"."password_reset_tokens" ALTER COLUMN "id" SET DEFAULT gen_random_uuid()`,
+    );
+
+    await queryRunner.query(
+      `ALTER TABLE "public"."email_verification_tokens" ALTER COLUMN "id" DROP DEFAULT`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "public"."email_verification_tokens" ALTER COLUMN "id" SET DEFAULT gen_random_uuid()`,
+    );
+
+    await queryRunner.query(
+      `ALTER TABLE "public"."users" ALTER COLUMN "id" DROP DEFAULT`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "public"."users" ALTER COLUMN "id" SET DEFAULT gen_random_uuid()`,
+    );
+
+    // FK_9b5f2938 sur funder_funding a déjà été recrée en CASCADE par 1778063984991 — skip
+    // Les contraintes user_roles/password_reset/email_verification sont déjà en place — skip
+  }
+
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(
+      `ALTER TABLE "public"."users" ALTER COLUMN "id" DROP DEFAULT`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "public"."users" ALTER COLUMN "id" SET DEFAULT uuid_generate_v4()`,
+    );
+
+    await queryRunner.query(
+      `ALTER TABLE "public"."email_verification_tokens" ALTER COLUMN "id" DROP DEFAULT`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "public"."email_verification_tokens" ALTER COLUMN "id" SET DEFAULT uuid_generate_v4()`,
+    );
+
+    await queryRunner.query(
+      `ALTER TABLE "public"."password_reset_tokens" ALTER COLUMN "id" DROP DEFAULT`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "public"."password_reset_tokens" ALTER COLUMN "id" SET DEFAULT uuid_generate_v4()`,
+    );
+
+    await queryRunner.query(
+      `ALTER TABLE "public"."user_roles" ALTER COLUMN "id" DROP DEFAULT`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "public"."user_roles" ALTER COLUMN "id" SET DEFAULT uuid_generate_v4()`,
+    );
+
+    await queryRunner.query(
+      `ALTER TABLE "public"."roles" ALTER COLUMN "id" DROP DEFAULT`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "public"."roles" ALTER COLUMN "id" SET DEFAULT uuid_generate_v4()`,
+    );
+
+    await queryRunner.query(
+      `ALTER TABLE "public"."protected_area" ALTER COLUMN "geometry" TYPE geometry(GEOMETRY,0)`,
+    );
+  }
 }
