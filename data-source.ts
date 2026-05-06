@@ -10,6 +10,10 @@ import { Role } from './src/infrastructure/models/auth/role.model';
 import { UserRole } from './src/infrastructure/models/auth/user-role.model';
 import { PasswordResetToken } from './src/infrastructure/models/auth/password-reset-token.model';
 import { EmailVerificationToken } from './src/infrastructure/models/auth/email-verification-token.model';
+import { Activity } from './src/infrastructure/models/activity.model';
+import { ActivityFunding } from './src/infrastructure/models/activity-funding.model';
+import { ProtectedAreaFunding } from './src/infrastructure/models/protected-area-funding.model';
+import { Disbursement } from './src/infrastructure/models/disbursement.model';
 
 dotenv.config({ path: `.env` });
 dotenv.config();
@@ -34,6 +38,10 @@ export const AppDataSource = new DataSource({
     Role,
     PasswordResetToken,
     EmailVerificationToken,
+    Activity,
+    ActivityFunding,
+    ProtectedAreaFunding,
+    Disbursement,
   ],
   migrations: ['src/infrastructure/migrations/*.ts'],
   synchronize: false,

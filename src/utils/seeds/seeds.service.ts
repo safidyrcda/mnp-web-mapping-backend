@@ -28,7 +28,15 @@ export class SeedService {
       throw new HttpException('AP not found', HttpStatus.NOT_FOUND);
     }
 
-    return await this.protectedAreaRepository.update(res.id, {
+    const id = res.id;
+    if (!id) {
+      throw new HttpException(
+        'Protected area id is missing',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    return await this.protectedAreaRepository.update(id, {
       name: data.name,
       status: data.status,
     });
@@ -98,8 +106,8 @@ export class SeedService {
       const newFunding: Partial<Funding> = {
         name: row.name,
         amount: amount,
-        funder: funder,
-        protectedArea: protectedArea,
+        protectedAreaFundings: [{ protectedArea }],
+        funderFundings: [{ funder }],
       };
 
       if (debut) {

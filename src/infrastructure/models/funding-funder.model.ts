@@ -1,9 +1,7 @@
 import {
-  Column,
   CreateDateColumn,
   Entity,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Funder } from './funder.model';
@@ -12,14 +10,17 @@ import { Funding } from './funding.model';
 @Entity()
 export class FunderFunding {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id?: string;
 
   @ManyToOne(() => Funder, (funder) => funder.id, { nullable: true })
-  funder: Funder;
+  funder?: Funder;
 
-  @ManyToOne(() => Funding, (funding) => funding.id, { nullable: true })
-  funding: Funding;
+  @ManyToOne(() => Funding, (funding) => funding.id, {
+    nullable: true,
+    onDelete: 'CASCADE',
+  })
+  funding?: Funding;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt?: Date;
 }

@@ -1,13 +1,13 @@
-// src/infrastructure/repositories/src/funder-funding.repository.ts  (INCHANGÉ)
+// src/infrastructure/repositories/src/protected-area-funding.repository.ts
 import { Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { BaseRepository } from '../base.repository';
-import { FunderFunding } from 'src/infrastructure/models/funding-funder.model';
+import { ProtectedAreaFunding } from 'src/infrastructure/models/protected-area-funding.model';
 
 @Injectable()
-export class FunderFundingRepository extends BaseRepository<FunderFunding> {
+export class ProtectedAreaFundingRepository extends BaseRepository<ProtectedAreaFunding> {
   constructor(dataSource: DataSource) {
-    super(dataSource, FunderFunding);
+    super(dataSource, ProtectedAreaFunding);
   }
 
   async deleteByFundingId(fundingId: string): Promise<number> {

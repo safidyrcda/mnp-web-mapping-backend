@@ -3,20 +3,20 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 @Entity()
 export class ProtectedArea {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id?: string;
 
   @Column({ unique: true })
-  sigle: string;
+  sigle?: string;
 
   @Column('geometry', { nullable: true })
-  geometry: Record<string, unknown>;
+  geometry?: Record<string, unknown>;
 
   @Column('float', { nullable: true })
-  size: number;
+  size?: number;
 
   @Column({ nullable: true, type: 'varchar' })
-  name: string;
+  name?: string;
 
   @Column({ nullable: true })
-  status: string;
+  status?: string;
 }

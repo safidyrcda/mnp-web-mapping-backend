@@ -6,100 +6,54 @@ import { FunderFunding } from 'src/infrastructure/models/funding-funder.model';
 
 @Injectable()
 export class FundingRepository extends BaseRepository<Funding> {
-  constructor(
-    dataSource: DataSource,
-    private readonly funderFundingDataSource: DataSource,
-  ) {
+  constructor(dataSource: DataSource) {
     super(dataSource, Funding);
   }
 
-  async find() {
-    const res = await this.dataSource.getRepository(Funding).find({
-      relations: {
-        protectedArea: true,
-        funderFundings: {
-          funder: true,
-        },
-      },
-      select: {
-        id: true,
-        name: true,
-        amount: true,
-        currency: true,
-        debut: true,
-        end: true,
-        protectedArea: {
-          id: true,
-          name: true,
-        },
-        funderFundings: {
-          id: true,
-          funder: {
-            id: true,
-            name: true,
-          },
-        },
-      },
-    });
-
-    return res;
+  private get repo() {
+    return this.dataSource.getRepository(Funding);
   }
 
-  async findAllWithFunders(): Promise<any[]> {
-    return await this.dataSource.getRepository(Funding).find({
-      relations: {
-        funderFundings: {
-          funder: true,
-        },
-      },
+  private readonly defaultRelations = {
+    protectedAreaFundings: { protectedArea: true },
+    funderFundings: { funder: true },
+    project: true,
+    disbursements: true,
+    activityFundings: { activity: true }, // many-to-many via jointure
+  };
+
+  async find(): Promise<Funding[]> {
+    return this.repo.find({
+      relations: this.defaultRelations,
     });
   }
 
-  async findByAPId(protectedAreaId: string) {
-    const res = await this.dataSource.getRepository(Funding).find({
-      where: { protectedArea: { id: protectedAreaId } },
-      relations: {
-        protectedArea: true,
-        funderFundings: {
-          funder: true,
-        },
-      },
-      select: {
-        id: true,
-        name: true,
-        amount: true,
-        currency: true,
-        debut: true,
-        end: true,
-        protectedArea: {
-          id: true,
-          name: true, // ⚡ seulement les champs nécessaires
-        },
-        funderFundings: {
-          id: true,
-          funder: {
-            id: true,
-            name: true,
-          },
-        },
-      },
+  async findAllWithFunders(): Promise<Funding[]> {
+    return this.repo.find({
+      relations: { funderFundings: { funder: true } },
     });
-
-    return res;
   }
 
-  async findAllFunder(fundingId: string) {
-    return await this.funderFundingDataSource
-      .getRepository(FunderFunding)
-      .find({
-        where: {
-          funding: {
-            id: fundingId,
-          },
-        },
-        relations: {
-          funder: true,
-        },
-      });
+  // Recherche par AP : on passe par la table de jointure ProtectedAreaFunding
+  async findByAPId(protectedAreaId: string): Promise<Funding[]> {
+    return this.repo
+      .createQueryBuilder('funding')
+      .innerJoinAndSelect('funding.protectedAreaFundings', 'paf')
+      .innerJoinAndSelect('paf.protectedArea', 'pa')
+      .leftJoinAndSelect('funding.funderFundings', 'ff')
+      .leftJoinAndSelect('ff.funder', 'funder')
+      .leftJoinAndSelect('funding.project', 'project')
+      .leftJoinAndSelect('funding.disbursements', 'disbursements')
+      .leftJoinAndSelect('funding.activityFundings', 'af') // jointure many-to-many
+      .leftJoinAndSelect('af.activity', 'activity')
+      .where('pa.id = :protectedAreaId', { protectedAreaId })
+      .getMany();
+  }
+
+  async findAllFunder(fundingId: string): Promise<FunderFunding[]> {
+    return this.dataSource.getRepository(FunderFunding).find({
+      where: { funding: { id: fundingId } },
+      relations: { funder: true },
+    });
   }
 }

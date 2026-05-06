@@ -6,12 +6,16 @@ import { Funding } from 'src/infrastructure/models/funding.model';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Project } from 'src/infrastructure/models/project.model';
+import { Activity } from 'src/infrastructure/models/activity.model';
+import { ActivityFunding } from 'src/infrastructure/models/activity-funding.model';
+import { Disbursement } from 'src/infrastructure/models/disbursement.model';
 import { FunderFunding } from 'src/infrastructure/models/funding-funder.model';
 import { User } from 'src/infrastructure/models/auth/user.model';
 import { UserRole } from 'src/infrastructure/models/auth/user-role.model';
 import { Role } from 'src/infrastructure/models/auth/role.model';
 import { PasswordResetToken } from 'src/infrastructure/models/auth/password-reset-token.model';
 import { EmailVerificationToken } from 'src/infrastructure/models/auth/email-verification-token.model';
+import { ProtectedAreaFunding } from 'src/infrastructure/models/protected-area-funding.model';
 
 @Global()
 @Module({
@@ -31,6 +35,10 @@ import { EmailVerificationToken } from 'src/infrastructure/models/auth/email-ver
           Funding,
           ProtectedArea,
           Project,
+          Activity,
+          ActivityFunding,
+          ProtectedAreaFunding,
+          Disbursement,
           FunderFunding,
           User,
           UserRole,

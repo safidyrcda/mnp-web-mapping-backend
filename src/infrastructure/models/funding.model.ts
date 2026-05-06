@@ -1,3 +1,6 @@
+// src/infrastructure/models/funding.model.ts
+// AVANT : un seul protectedArea (ManyToOne)
+// APRÈS  : plusieurs APs via ProtectedAreaFunding + amountInEuro + disbursements
 import {
   Column,
   CreateDateColumn,
@@ -6,31 +9,28 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Funder } from './funder.model';
-import { ProtectedArea } from './protected-area.model';
 import { Project } from './project.model';
 import { FunderFunding } from './funding-funder.model';
+import { ProtectedAreaFunding } from './protected-area-funding.model';
+import { Disbursement } from './disbursement.model';
+import { ActivityFunding } from './activity-funding.model';
 
 @Entity()
 export class Funding {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id?: string;
 
   @Column({ nullable: true, type: 'varchar' })
-  name: string;
+  name?: string;
 
-  @ManyToOne(() => Funder, (funder) => funder.id, { nullable: true })
-  funder: Funder;
-
-  @ManyToOne(() => ProtectedArea, (protectedArea) => protectedArea.id, {
-    nullable: true,
+  // Relation many-to-many avec ProtectedArea via table de jointure explicite
+  @OneToMany(() => ProtectedAreaFunding, (paf) => paf.funding, {
+    cascade: true,
   })
-  protectedArea: ProtectedArea;
+  protectedAreaFundings?: ProtectedAreaFunding[];
 
-  @ManyToOne(() => Project, (project) => project.id, {
-    nullable: true,
-  })
-  project: Project;
+  @ManyToOne(() => Project, (project) => project.id, { nullable: true })
+  project?: Project;
 
   @Column({ nullable: true, type: 'date' })
   debut?: Date;
@@ -41,12 +41,23 @@ export class Funding {
   @Column({ nullable: true, type: 'float' })
   amount?: number;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'varchar' })
   currency?: string;
 
+  // Montant converti en Euro (calculé ou saisi manuellement)
+  @Column({ nullable: true, type: 'float' })
+  amountInEuro?: number;
+
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt?: Date;
 
   @OneToMany(() => FunderFunding, (ff) => ff.funding, { cascade: true })
-  funderFundings: FunderFunding[];
+  funderFundings?: FunderFunding[];
+
+  @OneToMany(() => Disbursement, (d) => d.funding, { cascade: true })
+  disbursements?: Disbursement[];
+
+  // Relation many-to-many avec Activity via table de jointure explicite
+  @OneToMany(() => ActivityFunding, (af) => af.funding, { cascade: true })
+  activityFundings?: ActivityFunding[];
 }

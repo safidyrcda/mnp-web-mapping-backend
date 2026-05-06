@@ -17,31 +17,31 @@ export class FundingController {
   constructor(private readonly fundingService: FundingService) {}
 
   @Get()
-  async findAll(): Promise<Funding[]> {
+  findAll(): Promise<Funding[]> {
     return this.fundingService.findAll();
   }
 
   @Get(':fundingId/funders')
-  async findAllFunders(@Param('fundingId') fundingId: string) {
+  findAllFunders(@Param('fundingId') fundingId: string) {
     return this.fundingService.findFundersByFunding(fundingId);
   }
 
+  // Tous les fundings liés à une AP
   @Get('protected-area/:protectedAreaId')
-  async findAllByProtectedArea(
-    @Param('protectedAreaId') protectedAreaId: string,
-  ) {
+  findAllByProtectedArea(@Param('protectedAreaId') protectedAreaId: string) {
     return this.fundingService.findByProtectedArea(protectedAreaId);
   }
 
+  // Tous les bailleurs liés à une AP (via ses fundings)
   @Get('protected-area/:protectedAreaId/funders')
-  async findAllFundersByProtectedArea(
+  findAllFundersByProtectedArea(
     @Param('protectedAreaId') protectedAreaId: string,
   ) {
     return this.fundingService.findFundersByProtectedArea(protectedAreaId);
   }
 
   @Post()
-  async create(@Body() data: CreateFundingDto): Promise<Funding> {
+  create(@Body() data: CreateFundingDto): Promise<Funding> {
     return this.fundingService.create(data);
   }
 
@@ -50,19 +50,15 @@ export class FundingController {
     @Param('id') id: string,
     @Body() data: UpdateFundingDto,
   ): Promise<Funding | null> {
-    let debut;
-    let end;
-    if (data.debut) debut = new Date(data.debut);
-    if (data.end) end = new Date(data.end);
     return this.fundingService.update(id, {
       ...data,
-      debut: debut,
-      end: end,
+      debut: data.debut ? new Date(data.debut) : undefined,
+      end: data.end ? new Date(data.end) : undefined,
     });
   }
 
   @Delete(':id')
-  async delete(@Param('id') id: string): Promise<boolean> {
+  delete(@Param('id') id: string): Promise<boolean> {
     return this.fundingService.delete(id);
   }
 }

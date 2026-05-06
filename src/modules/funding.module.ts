@@ -12,6 +12,14 @@ import { Project } from 'src/infrastructure/models/project.model';
 import { ProjectRepository } from 'src/infrastructure/repositories/src/project.repository';
 import { FunderFunding } from 'src/infrastructure/models/funding-funder.model';
 import { FunderFundingRepository } from 'src/infrastructure/repositories/src/funder-funding.repository';
+import { ProtectedAreaFunding } from 'src/infrastructure/models/protected-area-funding.model';
+import { ProtectedAreaFundingRepository } from 'src/infrastructure/repositories/src/protected-area-funding.repository';
+import { Disbursement } from 'src/infrastructure/models/disbursement.model';
+import { DisbursementRepository } from 'src/infrastructure/repositories/src/disbursement.repository';
+import { ActivityRepository } from 'src/infrastructure/repositories/src/activity.repository';
+import { Activity } from 'src/infrastructure/models/activity.model';
+import { ActivityFunding } from 'src/infrastructure/models/activity-funding.model';
+import { ActivityFundingRepository } from 'src/infrastructure/repositories/src/activity-funding.repository';
 
 @Module({
   imports: [
@@ -21,11 +29,19 @@ import { FunderFundingRepository } from 'src/infrastructure/repositories/src/fun
       ProtectedArea,
       Project,
       FunderFunding,
+      ProtectedAreaFunding,
+      Disbursement,
+      Activity,
+      ActivityFunding,
     ]),
   ],
   controllers: [FundingController],
   providers: [
     FundingRepository,
+    DisbursementRepository,
+    ActivityRepository,
+    ActivityFundingRepository,
+    ProtectedAreaFundingRepository,
     FunderRepository,
     ProtectedAreaRepository,
     FundingService,

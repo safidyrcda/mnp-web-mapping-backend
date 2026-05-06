@@ -3,6 +3,8 @@ import { DatabaseModule } from './modules/database.module';
 import { ProtectedAreaModule } from './modules/protected-area.module';
 import { FunderModule } from './modules/funder.module';
 import { FundingModule } from './modules/funding.module';
+import { DisbursementModule } from './modules/disbursement.module';
+import { ActivityModule } from './modules/activity.module';
 import { ConfigModule } from '@nestjs/config';
 import { ProjectModule } from './modules/project.module';
 import { AuthModule } from './modules/auth.module';
@@ -17,6 +19,8 @@ import { AuthModule } from './modules/auth.module';
     ProtectedAreaModule,
     FunderModule,
     FundingModule,
+    DisbursementModule,
+    ActivityModule,
     ProjectModule,
     AuthModule,
   ],
