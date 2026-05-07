@@ -30,6 +30,7 @@ import { ProtectedAreaFunding } from 'src/infrastructure/models/protected-area-f
         password: configService.get<string>('DATABASE_PASSWORD'),
         database: configService.get('DATABASE_NAME'),
         schema: 'public',
+        uuidExtension: 'pgcrypto',
         entities: [
           Funder,
           Funding,
