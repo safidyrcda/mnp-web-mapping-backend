@@ -20,6 +20,10 @@ export class ActivityService extends BaseService<Activity> {
     return this.repository.findByFundingId(fundingId);
   }
 
+  update(id: string, data: Partial<Activity>): Promise<Activity | null> {
+    return this.repository.update(id, data);
+  }
+
   create(data: Partial<Activity>): Promise<Activity> {
     return this.repository.create(data);
   }
