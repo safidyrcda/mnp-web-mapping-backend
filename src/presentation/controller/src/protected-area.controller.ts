@@ -25,4 +25,9 @@ export class ProtectedAreaController {
   async delete(@Param('id') id: string): Promise<boolean> {
     return this.protectedAreaService.delete(id);
   }
+
+  @Get(':id/detail')
+  async findDetail(@Param('id') id: string) {
+    return this.protectedAreaService.findDetail(id);
+  }
 }

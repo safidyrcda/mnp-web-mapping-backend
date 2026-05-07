@@ -24,6 +24,74 @@ export class ProtectedAreaRepository extends BaseRepository<ProtectedArea> {
     return result;
   }
 
+  async findDetailById(id: string) {
+    const result = await this.dataSource.query(
+      `
+    SELECT
+      pa.id,
+      pa.sigle,
+      pa.name,
+      pa.status,
+      ST_Area(pa.geometry::geography) / 10000 AS size
+    FROM public."protected_area" pa
+    WHERE pa.id = $1
+    LIMIT 1;
+    `,
+      [id],
+    );
+
+    if (!result[0]) return null;
+
+    // Tous les fundings liés à cette AP via protected_area_funding
+    const fundings = await this.dataSource.query(
+      `
+    SELECT
+      f.id,
+      f.name,
+      f.debut,
+      f.end,
+      f.amount,
+      f.currency,
+      f."amountInEuro" AS "amountInEuro",
+
+      -- Somme des décaissements
+      COALESCE(SUM(d.amount), 0)          AS "totalDisbursed",
+      COALESCE(SUM(d."amountInEuro"), 0)  AS "totalDisbursedEuro",
+
+      -- Bailleurs (agrégés en JSON)
+      COALESCE(
+        JSON_AGG(DISTINCT JSONB_BUILD_OBJECT('id', fu.id, 'name', fu.name, 'fullname', fu.fullname))
+        FILTER (WHERE fu.id IS NOT NULL),
+        '[]'
+      ) AS funders,
+
+      -- Autres APs concernées par ce même funding
+      COALESCE(
+        JSON_AGG(DISTINCT JSONB_BUILD_OBJECT('id', pa2.id, 'sigle', pa2.sigle, 'name', pa2.name))
+        FILTER (WHERE pa2.id IS NOT NULL AND pa2.id != $1),
+        '[]'
+      ) AS "otherProtectedAreas"
+
+    FROM public."protected_area_funding" paf
+    JOIN public."funding" f ON f.id = paf."fundingId"
+    LEFT JOIN public."disbursement" d ON d."fundingId" = f.id
+    LEFT JOIN public."funder_funding" ff ON ff."fundingId" = f.id
+    LEFT JOIN public."funder" fu ON fu.id = ff."funderId"
+    LEFT JOIN public."protected_area_funding" paf2 ON paf2."fundingId" = f.id
+    LEFT JOIN public."protected_area" pa2 ON pa2.id = paf2."protectedAreaId"
+    WHERE paf."protectedAreaId" = $1
+    GROUP BY f.id, f.name, f.debut, f.end, f.amount, f.currency, f."amountInEuro"
+    ORDER BY f.debut ASC NULLS LAST;
+    `,
+      [id],
+    );
+
+    return {
+      ...result[0],
+      fundings,
+    };
+  }
+
   async findOneBySigle(sigle: string) {
     return await this.dataSource
       .getRepository(ProtectedArea)

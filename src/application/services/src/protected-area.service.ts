@@ -16,4 +16,8 @@ export class ProtectedAreaService extends BaseService<ProtectedArea> {
   findOneAPGeometry(id: string) {
     return this.repository.findOneAPGeometry(id);
   }
+
+  findDetail(id: string) {
+    return this.repository.findDetailById(id);
+  }
 }
