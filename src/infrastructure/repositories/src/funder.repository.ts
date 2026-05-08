@@ -10,6 +10,12 @@ export class FunderRepository extends BaseRepository<Funder> {
     super(dataSource, Funder);
   }
 
+  async find(): Promise<Funder[]> {
+    return this.dataSource.getRepository(Funder).find({
+      order: { name: 'ASC' },
+    });
+  }
+
   async findOneByName(name: string) {
     return this.dataSource.getRepository(Funder).findOneBy({ name });
   }
