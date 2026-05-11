@@ -25,6 +25,7 @@ export class FundingRepository extends BaseRepository<Funding> {
   async find(): Promise<Funding[]> {
     return this.repo.find({
       relations: this.defaultRelations,
+      order: { createdAt: 'ASC' },
     });
   }
 
