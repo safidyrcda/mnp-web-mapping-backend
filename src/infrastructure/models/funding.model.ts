@@ -23,6 +23,9 @@ export class Funding {
   @Column({ nullable: true, type: 'varchar' })
   name?: string;
 
+  @Column({ nullable: true, type: 'text' })
+  description?: string;
+
   // Relation many-to-many avec ProtectedArea via table de jointure explicite
   @OneToMany(() => ProtectedAreaFunding, (paf) => paf.funding, {
     cascade: true,

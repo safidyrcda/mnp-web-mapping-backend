@@ -27,6 +27,7 @@ export interface CreateFundingData {
   currency?: string;
   amountInEuro?: number;
   disbursements?: CreateDisbursementDto[];
+  description?: string;
   // IDs d'activités existantes à lier + éventuellement de nouvelles à créer
   activityIds?: string[];
   newActivities?: CreateActivityDto[];
@@ -42,6 +43,7 @@ export interface UpdateFundingData {
   amount?: number;
   currency?: string;
   amountInEuro?: number;
+  description?: string;
   disbursements?: CreateDisbursementDto[];
   activityIds?: string[];
   newActivities?: CreateActivityDto[];
@@ -91,6 +93,9 @@ export class FundingService extends BaseService<Funding> {
         throw new Error(`Project with ID ${data.projectId} does not exist.`);
       newFunding.project = project;
     }
+
+    if (data.description !== undefined)
+      newFunding.description = data.description;
 
     const createdFunding = await this.repository.create(newFunding);
 
@@ -164,6 +169,7 @@ export class FundingService extends BaseService<Funding> {
       funding.project = project;
     }
 
+    if (data.description !== undefined) funding.description = data.description;
     const updatedFunding = await this.repository.update(id, funding);
     if (!updatedFunding)
       throw new Error(`Funding with ID ${id} could not be updated.`);

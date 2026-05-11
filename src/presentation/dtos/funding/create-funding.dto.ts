@@ -24,6 +24,11 @@ export class CreateFundingDto {
   @IsNotEmpty()
   readonly funders!: string[];
 
+  @ApiProperty({ example: 'Breve description', required: false })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
   @ApiProperty({
     example: ['uuid-ap-1', 'uuid-ap-2'],
     description: 'IDs des aires protégées concernées (1 ou plusieurs)',
