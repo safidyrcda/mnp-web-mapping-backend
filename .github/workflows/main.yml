@@ -2,11 +2,11 @@ name: Deploy Backend
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ['main']
 
 jobs:
   deploy:
-    runs-on: self-hosted   # ← utiliser ton runner self-hosted
+    runs-on: self-hosted # ← utiliser ton runner self-hosted
     steps:
       # 1️⃣ Récupérer le code
       - name: Checkout repository
@@ -27,6 +27,5 @@ jobs:
           pnpm install
           pnpm run migration:run
           pnpm run build
-          pm2 reload webmapping-backend
+          pm2 reload webmap-backend
           echo "Backend déployé avec succès ! 🚀"
-
