@@ -187,6 +187,12 @@ export class AutoMigration1780559938838 implements MigrationInterface {
     await queryRunner.query(
       `ALTER TABLE "public"."funder_funding" ALTER COLUMN "funderId" DROP NOT NULL`,
     );
+
+    await queryRunner.query(`
+  DELETE FROM "public"."funder_funding"
+  WHERE "funderId" NOT IN (SELECT "id" FROM "public"."funder")
+`);
+
     await queryRunner.query(
       `ALTER TABLE "public"."funder_funding" ADD CONSTRAINT "FK_9b5f2938c690aeed03e2bcff01b" FOREIGN KEY ("fundingId") REFERENCES "public"."funding"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
