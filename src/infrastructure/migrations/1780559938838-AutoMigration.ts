@@ -100,9 +100,14 @@ export class AutoMigration1780559938838 implements MigrationInterface {
     await queryRunner.query(
       `ALTER TABLE "public"."users" ALTER COLUMN "id" SET DEFAULT gen_random_uuid()`,
     );
+    await queryRunner.query(`
+  DELETE FROM "public"."funder_funding"
+  WHERE "funderId" NOT IN (SELECT "id" FROM "public"."funder")
+`);
     await queryRunner.query(
       `ALTER TABLE "public"."funder_funding" ADD CONSTRAINT "FK_12d8a4414b4c5a9c309e71f769e" FOREIGN KEY ("funderId") REFERENCES "public"."funder"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
+
     await queryRunner.query(
       `ALTER TABLE "public"."funder_funding" ADD CONSTRAINT "FK_9b5f2938c690aeed03e2bcff01b" FOREIGN KEY ("fundingId") REFERENCES "public"."funding"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
     );
@@ -187,11 +192,6 @@ export class AutoMigration1780559938838 implements MigrationInterface {
     await queryRunner.query(
       `ALTER TABLE "public"."funder_funding" ALTER COLUMN "funderId" DROP NOT NULL`,
     );
-
-    await queryRunner.query(`
-  DELETE FROM "public"."funder_funding"
-  WHERE "funderId" NOT IN (SELECT "id" FROM "public"."funder")
-`);
 
     await queryRunner.query(
       `ALTER TABLE "public"."funder_funding" ADD CONSTRAINT "FK_9b5f2938c690aeed03e2bcff01b" FOREIGN KEY ("fundingId") REFERENCES "public"."funding"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`,
