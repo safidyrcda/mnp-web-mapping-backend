@@ -46,6 +46,10 @@ export interface CreateFundingData {
   newActivities?: CreateActivityDto[];
 }
 
+export interface GetFundingDetailData extends Funder {
+  type?: FunderFundingType;
+}
+
 export interface UpdateFundingData {
   funders?: string[];
   protectedAreaIds?: string[];
@@ -266,12 +270,15 @@ export class FundingService extends BaseService<Funding> {
     return Array.from(fundersMap.values());
   }
 
-  async findFundersByFunding(fundingId: string): Promise<Funder[]> {
+  async findFundersByFunding(
+    fundingId: string,
+  ): Promise<GetFundingDetailData[]> {
     const funderFundings = await this.repository.findAllFunder(fundingId);
-    const fundersMap = new Map<string, Funder>();
+    const fundersMap = new Map<string, GetFundingDetailData>();
     for (const ff of funderFundings) {
       const funder = ff.funder!;
-      if (!fundersMap.has(funder.id!)) fundersMap.set(funder.id!, funder);
+      if (!fundersMap.has(funder.id!))
+        fundersMap.set(funder.id!, { ...funder, type: ff.type });
     }
     return Array.from(fundersMap.values());
   }
