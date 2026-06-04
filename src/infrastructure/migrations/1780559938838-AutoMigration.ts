@@ -50,12 +50,7 @@ export class AutoMigration1780559938838 implements MigrationInterface {
       `ALTER TABLE "public"."protected_area" ALTER COLUMN "geometry" TYPE geometry`,
     );
     await queryRunner.query(
-      `ALTER TABLE "public"."funder_funding" DROP CONSTRAINT "FK_12d8a4414b4c5a9c309e71f769e"`,
-    );
-    await queryRunner.query(
-      await queryRunner.query(
-        `ALTER TABLE "public"."funder_funding" DROP CONSTRAINT IF EXISTS "FK_12d8a4414b4c5a9c309e71f769e"`,
-      ),
+      `ALTER TABLE "public"."funder_funding" DROP CONSTRAINT IF EXISTS "FK_12d8a4414b4c5a9c309e71f769e"`,
     );
     await queryRunner.query(
       `ALTER TABLE "public"."funder_funding" ALTER COLUMN "funderId" SET NOT NULL`,
