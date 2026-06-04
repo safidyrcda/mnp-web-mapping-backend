@@ -15,6 +15,19 @@ import { Activity } from 'src/infrastructure/models/activity.model';
 import { ProtectedArea } from 'src/infrastructure/models/protected-area.model';
 import { CreateDisbursementDto } from 'src/presentation/dtos/disbursement/create-disbursement.dto';
 import { CreateActivityDto } from 'src/presentation/dtos/activity/create-activity.dto';
+import { FunderFundingType } from 'src/infrastructure/models/funding-funder.model';
+
+export interface PAFundingEntry {
+  protectedAreaId: string;
+  amount?: number;
+  currency?: string;
+  amountInEuro?: number;
+}
+
+export interface FunderFundingEntry {
+  funderId: string;
+  type?: FunderFundingType;
+}
 
 export interface CreateFundingData {
   funders: string[];
@@ -297,5 +310,84 @@ export class FundingService extends BaseService<Funding> {
       results.push(activity);
     }
     return results;
+  }
+
+  /**
+   * GET :fundingId/protected-area-fundings
+   * Retourne toutes les liaisons ProtectedAreaFunding d'un financement
+   */
+  async findProtectedAreaFundings(fundingId: string) {
+    return this.protectedAreaFundingRepository.findByFundingId(fundingId);
+  }
+
+  /**
+   * PUT :fundingId/protected-area-fundings
+   * Remplace toutes les liaisons AP d'un financement (upsert complet)
+   */
+  async upsertProtectedAreaFundings(
+    fundingId: string,
+    entries: PAFundingEntry[],
+  ) {
+    const funding = await this.repository.findById(fundingId);
+    if (!funding)
+      throw new Error(`Funding with ID ${fundingId} does not exist.`);
+
+    // Supprimer les liaisons existantes
+    await this.protectedAreaFundingRepository.deleteByFundingId(fundingId);
+
+    // Recréer avec les nouvelles valeurs
+    for (const entry of entries) {
+      const pa = await this.protectedAreaRepository.findById(
+        entry.protectedAreaId,
+      );
+      if (!pa)
+        throw new Error(
+          `Protected Area with ID ${entry.protectedAreaId} does not exist.`,
+        );
+
+      await this.protectedAreaFundingRepository.create({
+        protectedArea: pa,
+        funding,
+        amount: entry.amount,
+        currency: entry.currency,
+        amountInEuro: entry.amountInEuro,
+      });
+    }
+
+    return this.protectedAreaFundingRepository.findByFundingId(fundingId);
+  }
+
+  /**
+   * GET :fundingId/funder-fundings
+   * Retourne toutes les liaisons FunderFunding d'un financement (avec type)
+   */
+  async findFunderFundings(fundingId: string) {
+    return this.funderFundingRepository.findByFundingId(fundingId);
+  }
+
+  /**
+   * PUT :fundingId/funder-fundings
+   * Remplace toutes les liaisons Funder d'un financement (upsert complet)
+   */
+  async upsertFunderFundings(fundingId: string, entries: FunderFundingEntry[]) {
+    const funding = await this.repository.findById(fundingId);
+    if (!funding)
+      throw new Error(`Funding with ID ${fundingId} does not exist.`);
+
+    await this.funderFundingRepository.deleteByFundingId(fundingId);
+
+    for (const entry of entries) {
+      const funder = await this.funderRepository.findById(entry.funderId);
+      if (!funder)
+        throw new Error(`Funder with ID ${entry.funderId} does not exist.`);
+
+      await this.funderFundingRepository.create({
+        funder,
+        funding,
+        type: entry.type,
+      });
+    }
+
+    return this.funderFundingRepository.findByFundingId(fundingId);
   }
 }

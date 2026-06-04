@@ -6,11 +6,14 @@ import {
   Param,
   Patch,
   Post,
+  Put,
 } from '@nestjs/common';
 import { FundingService } from 'src/application/services/src/funding.service';
 import { Funding } from 'src/infrastructure/models/funding.model';
 import { CreateFundingDto } from 'src/presentation/dtos/funding/create-funding.dto';
 import { UpdateFundingDto } from 'src/presentation/dtos/funding/update-funding.dto';
+import { UpsertFunderFundingsDto } from 'src/presentation/dtos/funding/upsert-funder-fundings.dto';
+import { UpsertProtectedAreaFundingsDto } from 'src/presentation/dtos/funding/upsert-protected-area-fundings.dto';
 
 @Controller('fundings')
 export class FundingController {
@@ -60,5 +63,50 @@ export class FundingController {
   @Delete(':id')
   delete(@Param('id') id: string): Promise<boolean> {
     return this.fundingService.delete(id);
+  }
+
+  /**
+   * GET /fundings/:fundingId/protected-area-fundings
+   * Liste les montants par AP pour un financement
+   */
+  @Get(':fundingId/protected-area-fundings')
+  findProtectedAreaFundings(@Param('fundingId') fundingId: string) {
+    return this.fundingService.findProtectedAreaFundings(fundingId);
+  }
+
+  /**
+   * PUT /fundings/:fundingId/protected-area-fundings
+   * Remplace les montants par AP (upsert complet)
+   */
+  @Put(':fundingId/protected-area-fundings')
+  upsertProtectedAreaFundings(
+    @Param('fundingId') fundingId: string,
+    @Body() dto: UpsertProtectedAreaFundingsDto,
+  ) {
+    return this.fundingService.upsertProtectedAreaFundings(
+      fundingId,
+      dto.entries,
+    );
+  }
+
+  /**
+   * GET /fundings/:fundingId/funder-fundings
+   * Liste les bailleurs + leur type pour un financement
+   */
+  @Get(':fundingId/funder-fundings')
+  findFunderFundings(@Param('fundingId') fundingId: string) {
+    return this.fundingService.findFunderFundings(fundingId);
+  }
+
+  /**
+   * PUT /fundings/:fundingId/funder-fundings
+   * Remplace les bailleurs + type (upsert complet)
+   */
+  @Put(':fundingId/funder-fundings')
+  upsertFunderFundings(
+    @Param('fundingId') fundingId: string,
+    @Body() dto: UpsertFunderFundingsDto,
+  ) {
+    return this.fundingService.upsertFunderFundings(fundingId, dto.entries);
   }
 }

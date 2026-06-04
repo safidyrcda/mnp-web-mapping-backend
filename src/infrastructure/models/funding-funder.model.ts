@@ -1,26 +1,28 @@
-import {
-  CreateDateColumn,
-  Entity,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Funder } from './funder.model';
 import { Funding } from './funding.model';
+
+export enum FunderFundingType {
+  FUNDER = 'funder',
+  TECHNICAL_PARTNER = 'technical_partner',
+  STRATEGICAL_PARTNER = 'strategical_partner',
+}
 
 @Entity()
 export class FunderFunding {
   @PrimaryGeneratedColumn('uuid')
   id?: string;
 
-  @ManyToOne(() => Funder, (funder) => funder.id, { nullable: true })
+  @ManyToOne(() => Funder, (f) => f.funderFunding, { nullable: false })
   funder?: Funder;
 
-  @ManyToOne(() => Funding, (funding) => funding.id, {
-    nullable: true,
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne(() => Funding, (f) => f.funderFundings, { nullable: false })
   funding?: Funding;
 
-  @CreateDateColumn()
-  createdAt?: Date;
+  @Column({
+    nullable: true,
+    type: 'enum',
+    enum: FunderFundingType,
+  })
+  type?: FunderFundingType;
 }

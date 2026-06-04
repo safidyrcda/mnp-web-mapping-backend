@@ -1,4 +1,4 @@
-import { Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Funding } from './funding.model';
 import { ProtectedArea } from './protected-area.model';
 
@@ -15,4 +15,13 @@ export class ProtectedAreaFunding {
     onDelete: 'CASCADE',
   })
   funding?: Funding;
+
+  @Column('float', { nullable: true })
+  amount?: number;
+
+  @Column({ nullable: true, type: 'varchar' })
+  currency?: string;
+
+  @Column('float', { nullable: true })
+  amountInEuro?: number;
 }

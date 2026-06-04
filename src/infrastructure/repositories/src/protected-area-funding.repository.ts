@@ -14,4 +14,11 @@ export class ProtectedAreaFundingRepository extends BaseRepository<ProtectedArea
     const result = await this.repository.delete({ funding: { id: fundingId } });
     return result.affected ?? 0;
   }
+
+  async findByFundingId(fundingId: string) {
+    return this.repository.find({
+      where: { funding: { id: fundingId } },
+      relations: ['protectedArea'],
+    });
+  }
 }
