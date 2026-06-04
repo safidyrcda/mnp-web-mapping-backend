@@ -1,6 +1,7 @@
-import { Body, Controller, Delete, Get, Param } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch } from '@nestjs/common';
 import { ProtectedAreaService } from 'src/application/services/src/protected-area.service';
 import { ProtectedArea } from 'src/infrastructure/models/protected-area.model';
+import { UpdateProtectedAreaDto } from 'src/presentation/dtos/protected-area/update-protected-area.dto';
 
 @Controller('protected-areas')
 export class ProtectedAreaController {
@@ -29,5 +30,10 @@ export class ProtectedAreaController {
   @Get(':id/detail')
   async findDetail(@Param('id') id: string) {
     return this.protectedAreaService.findDetail(id);
+  }
+
+  @Patch(':id')
+  async update(@Param('id') id: string, @Body() dto: UpdateProtectedAreaDto) {
+    return this.protectedAreaService.update(id, dto);
   }
 }

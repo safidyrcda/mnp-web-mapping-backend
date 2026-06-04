@@ -11,15 +11,23 @@ export class ProtectedAreaRepository extends BaseRepository<ProtectedArea> {
 
   async find() {
     const result = await this.dataSource.query(`
-      SELECT
-        id,
-        sigle,
-        name,
-        status,
-        ST_Area(geometry::geography) / 10000 AS size
-      FROM public."protected_area"
-      LIMIT 50;
-    `);
+    SELECT
+      id,
+      sigle,
+      name,
+      status,
+      superficie,
+      "creationYear",
+      regions,
+      districts,
+      communes,
+      "populationCount",
+      "femaleClpNumber",
+      "maleClpNumber",
+      ST_Area(geometry::geography) / 10000 AS size
+    FROM public."protected_area"
+    LIMIT 50;
+  `);
 
     return result;
   }
@@ -169,5 +177,13 @@ export class ProtectedAreaRepository extends BaseRepository<ProtectedArea> {
     };
 
     return feature;
+  }
+
+  async update(
+    id: string,
+    data: Partial<ProtectedArea>,
+  ): Promise<ProtectedArea | null> {
+    await this.dataSource.getRepository(ProtectedArea).update({ id }, data);
+    return this.dataSource.getRepository(ProtectedArea).findOneBy({ id });
   }
 }

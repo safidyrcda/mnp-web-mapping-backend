@@ -20,4 +20,8 @@ export class ProtectedAreaService extends BaseService<ProtectedArea> {
   findDetail(id: string) {
     return this.repository.findDetailById(id);
   }
+
+  update(id: string, data: Partial<ProtectedArea>) {
+    return this.repository.update(id, data);
+  }
 }
