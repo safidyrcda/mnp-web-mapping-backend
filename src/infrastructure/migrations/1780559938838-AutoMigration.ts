@@ -52,6 +52,14 @@ export class AutoMigration1780559938838 implements MigrationInterface {
     await queryRunner.query(
       `ALTER TABLE "public"."funder_funding" DROP CONSTRAINT IF EXISTS "FK_12d8a4414b4c5a9c309e71f769e"`,
     );
+
+    // ✅ Ajouter ces deux DROP juste avant les ADD CONSTRAINT funder_funding
+    await queryRunner.query(
+      `ALTER TABLE "public"."funder_funding" DROP CONSTRAINT IF EXISTS "FK_12d8a4414b4c5a9c309e71f769e"`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE "public"."funder_funding" DROP CONSTRAINT IF EXISTS "FK_9b5f2938c690aeed03e2bcff01b"`,
+    );
     await queryRunner.query(
       `ALTER TABLE "public"."funder_funding" ALTER COLUMN "funderId" SET NOT NULL`,
     );

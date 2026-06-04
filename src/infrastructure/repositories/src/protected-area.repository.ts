@@ -40,6 +40,14 @@ export class ProtectedAreaRepository extends BaseRepository<ProtectedArea> {
       pa.sigle,
       pa.name,
       pa.status,
+      pa.superficie,
+      pa."creationYear",
+      pa.regions,
+      pa.districts,
+      pa.communes,
+      pa."populationCount",
+      pa."femaleClpNumber",
+      pa."maleClpNumber",
       ST_Area(pa.geometry::geography) / 10000 AS size
     FROM public."protected_area" pa
     WHERE pa.id = $1
@@ -50,50 +58,59 @@ export class ProtectedAreaRepository extends BaseRepository<ProtectedArea> {
 
     if (!result[0]) return null;
 
-    // Tous les fundings liés à cette AP via protected_area_funding
     const fundings = await this.dataSource.query(
       `
-    SELECT
-      f.id,
-      f.name,
-      f.debut,
-      f.end,
-      f.amount,
-      f.currency,
-      f."amountInEuro" AS "amountInEuro",
+  SELECT
+    f.id,
+    f.name,
+    f.debut,
+    f.end,
+    f.amount        AS "globalAmount",
+    f.currency      AS "globalCurrency",
+    f."amountInEuro" AS "globalAmountInEuro",
 
-      -- Somme des décaissements
-      COALESCE(SUM(d.amount), 0)          AS "totalDisbursed",
-      COALESCE(SUM(d."amountInEuro"), 0)  AS "totalDisbursedEuro",
+    -- Montant spécifique à cette AP
+    paf.amount          AS "paAmount",
+    paf.currency        AS "paCurrency",
+    paf."amountInEuro"  AS "paAmountInEuro",
 
-      -- Bailleurs (agrégés en JSON)
-      COALESCE(
-        JSON_AGG(DISTINCT JSONB_BUILD_OBJECT('id', fu.id, 'name', fu.name, 'fullname', fu.fullname))
-        FILTER (WHERE fu.id IS NOT NULL),
-        '[]'
-      ) AS funders,
+    COALESCE((
+      SELECT SUM(d.amount) FROM public."disbursement" d WHERE d."fundingId" = f.id
+    ), 0) AS "totalDisbursed",
 
-      -- Autres APs concernées par ce même funding
-      COALESCE(
-        JSON_AGG(DISTINCT JSONB_BUILD_OBJECT('id', pa2.id, 'sigle', pa2.sigle, 'name', pa2.name))
-        FILTER (WHERE pa2.id IS NOT NULL AND pa2.id != $1),
-        '[]'
-      ) AS "otherProtectedAreas"
+    COALESCE((
+      SELECT SUM(d."amountInEuro") FROM public."disbursement" d WHERE d."fundingId" = f.id
+    ), 0) AS "totalDisbursedEuro",
 
-    FROM public."protected_area_funding" paf
-    JOIN public."funding" f ON f.id = paf."fundingId"
-    LEFT JOIN public."disbursement" d ON d."fundingId" = f.id
-    LEFT JOIN public."funder_funding" ff ON ff."fundingId" = f.id
-    LEFT JOIN public."funder" fu ON fu.id = ff."funderId"
-    LEFT JOIN public."protected_area_funding" paf2 ON paf2."fundingId" = f.id
-    LEFT JOIN public."protected_area" pa2 ON pa2.id = paf2."protectedAreaId"
-    WHERE paf."protectedAreaId" = $1
-    GROUP BY f.id, f.name, f.debut, f.end, f.amount, f.currency, f."amountInEuro"
-    ORDER BY f.debut ASC NULLS LAST;
-    `,
+    -- Bailleurs avec type, sans doublon
+    (
+      SELECT COALESCE(JSON_AGG(sub), '[]')
+      FROM (
+        SELECT DISTINCT fu.id, fu.name, fu.fullname, ff.type
+        FROM public."funder_funding" ff
+        JOIN public."funder" fu ON fu.id = ff."funderId"
+        WHERE ff."fundingId" = f.id
+      ) sub
+    ) AS funders,
+
+    -- Autres APs liées au même funding
+    (
+      SELECT COALESCE(JSON_AGG(sub), '[]')
+      FROM (
+        SELECT DISTINCT pa2.id, pa2.sigle, pa2.name
+        FROM public."protected_area_funding" paf2
+        JOIN public."protected_area" pa2 ON pa2.id = paf2."protectedAreaId"
+        WHERE paf2."fundingId" = f.id AND pa2.id != $1
+      ) sub
+    ) AS "otherProtectedAreas"
+
+  FROM public."protected_area_funding" paf
+  JOIN public."funding" f ON f.id = paf."fundingId"
+  WHERE paf."protectedAreaId" = $1
+  ORDER BY f.debut ASC NULLS LAST;
+  `,
       [id],
     );
-
     return {
       ...result[0],
       fundings,
@@ -149,6 +166,14 @@ export class ProtectedAreaRepository extends BaseRepository<ProtectedArea> {
       sigle,
       name,
       status,
+      superficie,
+      "creationYear",
+      regions,
+      districts,
+      communes,
+      "populationCount",
+      "femaleClpNumber",
+      "maleClpNumber",
       ST_AsGeoJSON(geometry) AS geometry,
       ST_Area(geometry::geography) / 10000 AS size 
     FROM public."protected_area"
