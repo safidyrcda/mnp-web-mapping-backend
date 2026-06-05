@@ -60,57 +60,72 @@ export class ProtectedAreaRepository extends BaseRepository<ProtectedArea> {
 
     const fundings = await this.dataSource.query(
       `
-  SELECT
-    f.id,
-    f.name,
-    f.debut,
-    f.end,
-    f.amount        AS "globalAmount",
-    f.currency      AS "globalCurrency",
-    f."amountInEuro" AS "globalAmountInEuro",
+    SELECT
+      f.id,
+      f.name,
+      f.debut,
+      f.end,
+      f.amount         AS "globalAmount",
+      f.currency       AS "globalCurrency",
+      f."amountInEuro" AS "globalAmountInEuro",
 
-    -- Montant spécifique à cette AP
-    paf.amount          AS "paAmount",
-    paf.currency        AS "paCurrency",
-    paf."amountInEuro"  AS "paAmountInEuro",
+      paf.amount          AS "paAmount",
+      paf.currency        AS "paCurrency",
+      paf."amountInEuro"  AS "paAmountInEuro",
 
-    COALESCE((
-      SELECT SUM(d.amount) FROM public."disbursement" d WHERE d."fundingId" = f.id
-    ), 0) AS "totalDisbursed",
+      COALESCE((
+        SELECT SUM(d.amount)
+        FROM public."disbursement" d
+        WHERE d."fundingId" = f.id
+      ), 0) AS "totalDisbursed",
 
-    COALESCE((
-      SELECT SUM(d."amountInEuro") FROM public."disbursement" d WHERE d."fundingId" = f.id
-    ), 0) AS "totalDisbursedEuro",
+      COALESCE((
+        SELECT SUM(d."amountInEuro")
+        FROM public."disbursement" d
+        WHERE d."fundingId" = f.id
+      ), 0) AS "totalDisbursedEuro",
 
-    -- Bailleurs avec type, sans doublon
-    (
-      SELECT COALESCE(JSON_AGG(sub), '[]')
-      FROM (
-        SELECT DISTINCT fu.id, fu.name, fu.fullname, ff.type
-        FROM public."funder_funding" ff
-        JOIN public."funder" fu ON fu.id = ff."funderId"
-        WHERE ff."fundingId" = f.id
-      ) sub
-    ) AS funders,
+      -- Bailleurs avec type, sans doublon
+      (
+        SELECT COALESCE(JSON_AGG(sub), '[]')
+        FROM (
+          SELECT DISTINCT fu.id, fu.name, fu.fullname, ff.type
+          FROM public."funder_funding" ff
+          JOIN public."funder" fu ON fu.id = ff."funderId"
+          WHERE ff."fundingId" = f.id
+        ) sub
+      ) AS funders,
 
-    -- Autres APs liées au même funding
-    (
-      SELECT COALESCE(JSON_AGG(sub), '[]')
-      FROM (
-        SELECT DISTINCT pa2.id, pa2.sigle, pa2.name
-        FROM public."protected_area_funding" paf2
-        JOIN public."protected_area" pa2 ON pa2.id = paf2."protectedAreaId"
-        WHERE paf2."fundingId" = f.id AND pa2.id != $1
-      ) sub
-    ) AS "otherProtectedAreas"
+      -- Activités liées à ce financement
+      (
+        SELECT COALESCE(JSON_AGG(sub ORDER BY sub.title), '[]')
+        FROM (
+          SELECT DISTINCT a.id, a.title, a.description
+          FROM public."activity_funding" af
+          JOIN public."activity" a ON a.id = af."activityId"
+          WHERE af."fundingId" = f.id
+        ) sub
+      ) AS activities,
 
-  FROM public."protected_area_funding" paf
-  JOIN public."funding" f ON f.id = paf."fundingId"
-  WHERE paf."protectedAreaId" = $1
-  ORDER BY f.debut ASC NULLS LAST;
-  `,
+      -- Autres APs liées au même funding
+      (
+        SELECT COALESCE(JSON_AGG(sub), '[]')
+        FROM (
+          SELECT DISTINCT pa2.id, pa2.sigle, pa2.name
+          FROM public."protected_area_funding" paf2
+          JOIN public."protected_area" pa2 ON pa2.id = paf2."protectedAreaId"
+          WHERE paf2."fundingId" = f.id AND pa2.id != $1
+        ) sub
+      ) AS "otherProtectedAreas"
+
+    FROM public."protected_area_funding" paf
+    JOIN public."funding" f ON f.id = paf."fundingId"
+    WHERE paf."protectedAreaId" = $1
+    ORDER BY f.debut ASC NULLS LAST;
+    `,
       [id],
     );
+
     return {
       ...result[0],
       fundings,
