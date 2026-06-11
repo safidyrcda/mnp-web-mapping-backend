@@ -8,6 +8,7 @@ import { ActivityModule } from './modules/activity.module';
 import { ConfigModule } from '@nestjs/config';
 import { ProjectModule } from './modules/project.module';
 import { AuthModule } from './modules/auth.module';
+import { ProtectedAreaFunderModule } from './modules/protected-area-funder.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { AuthModule } from './modules/auth.module';
     ActivityModule,
     ProjectModule,
     AuthModule,
+    ProtectedAreaFunderModule,
   ],
   controllers: [],
 
