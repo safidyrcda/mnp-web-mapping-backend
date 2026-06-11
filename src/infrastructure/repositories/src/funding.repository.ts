@@ -23,12 +23,20 @@ export class FundingRepository extends BaseRepository<Funding> {
   };
 
   async find(): Promise<Funding[]> {
-    return this.repo.find({
-      relations: this.defaultRelations,
-      order: { createdAt: 'ASC' },
-    });
+    return this.repo
+      .createQueryBuilder('funding')
+      .leftJoinAndSelect('funding.protectedAreaFundings', 'paf')
+      .leftJoin('paf.protectedArea', 'pa')
+      .addSelect(['pa.id', 'pa.sigle', 'pa.name', 'pa.status', 'pa.size'])
+      .leftJoinAndSelect('funding.funderFundings', 'ff')
+      .leftJoinAndSelect('ff.funder', 'funder')
+      .leftJoinAndSelect('funding.project', 'project')
+      .leftJoinAndSelect('funding.disbursements', 'disbursements')
+      .leftJoinAndSelect('funding.activityFundings', 'af')
+      .leftJoinAndSelect('af.activity', 'activity')
+      .orderBy('funding.createdAt', 'ASC')
+      .getMany();
   }
-
   async findAllWithFunders(): Promise<Funding[]> {
     return this.repo.find({
       relations: { funderFundings: { funder: true } },
