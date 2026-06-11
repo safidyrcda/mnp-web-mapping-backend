@@ -16,6 +16,7 @@ import { Role } from 'src/infrastructure/models/auth/role.model';
 import { PasswordResetToken } from 'src/infrastructure/models/auth/password-reset-token.model';
 import { EmailVerificationToken } from 'src/infrastructure/models/auth/email-verification-token.model';
 import { ProtectedAreaFunding } from 'src/infrastructure/models/protected-area-funding.model';
+import { ProtectedAreaFunder } from 'src/infrastructure/models/protected-area-funder';
 
 @Global()
 @Module({
@@ -46,6 +47,7 @@ import { ProtectedAreaFunding } from 'src/infrastructure/models/protected-area-f
           Role,
           PasswordResetToken,
           EmailVerificationToken,
+          ProtectedAreaFunder,
         ],
         synchronize: false,
       }),
