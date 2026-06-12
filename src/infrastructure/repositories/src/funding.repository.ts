@@ -37,6 +37,8 @@ export class FundingRepository extends BaseRepository<Funding> {
       .leftJoinAndSelect('funding.protectedAreaFundings', 'paf')
       .leftJoin('paf.protectedArea', 'pa')
       .addSelect(['pa.id', 'pa.sigle', 'pa.name', 'pa.status', 'pa.size'])
+      .leftJoinAndSelect('pa.protectedAreaPartners', 'pap')
+      .leftJoinAndSelect('pap.partner', 'partner')
       .leftJoinAndSelect('funding.funder', 'ff')
       .addSelect(['ff.id', 'ff.name'])
       .leftJoinAndSelect('funding.project', 'project')

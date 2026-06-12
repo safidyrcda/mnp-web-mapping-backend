@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { ProtectedAreaPartner } from './protected-area-partner.model';
 
 @Entity()
 export class ProtectedArea {
@@ -45,4 +46,9 @@ export class ProtectedArea {
 
   @Column({ nullable: true, type: 'int' })
   maleClpNumber?: number;
+
+  @OneToMany(() => ProtectedAreaPartner, (paf) => paf.protectedArea, {
+    cascade: true,
+  })
+  protectedAreaPartners?: ProtectedAreaPartner[];
 }
