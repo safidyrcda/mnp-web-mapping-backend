@@ -58,6 +58,7 @@ export class ProtectedAreaRepository extends BaseRepository<ProtectedArea> {
 
     if (!result[0]) return null;
 
+    // ── Financements liés à cette AP ────────────────────────────────────────
     const fundings = await this.dataSource.query(
       `
     SELECT
@@ -85,16 +86,12 @@ export class ProtectedAreaRepository extends BaseRepository<ProtectedArea> {
         WHERE d."fundingId" = f.id
       ), 0) AS "totalDisbursedEuro",
 
-      -- Bailleurs avec type, sans doublon
+      -- Bailleur unique de ce financement (relation directe Funding -> Funder)
       (
-        SELECT COALESCE(JSON_AGG(sub), '[]')
-        FROM (
-          SELECT DISTINCT fu.id, fu.name, fu.fullname, ff.type
-          FROM public."funder_funding" ff
-          JOIN public."funder" fu ON fu.id = ff."funderId"
-          WHERE ff."fundingId" = f.id
-        ) sub
-      ) AS funders,
+        SELECT JSON_BUILD_OBJECT('id', fu.id, 'name', fu.name, 'fullname', fu.fullname)
+        FROM public."funder" fu
+        WHERE fu.id = f."funderId"
+      ) AS funder,
 
       -- Activités liées à ce financement
       (
@@ -126,9 +123,39 @@ export class ProtectedAreaRepository extends BaseRepository<ProtectedArea> {
       [id],
     );
 
+    // ── Bailleurs uniques de l'AP (déduits des financements, dédupliqués) ───
+    const funders = await this.dataSource.query(
+      `
+      SELECT DISTINCT fu.id, fu.name, fu.fullname
+      FROM public."protected_area_funding" paf
+      JOIN public."funding" f ON f.id = paf."fundingId"
+      JOIN public."funder" fu ON fu.id = f."funderId"
+      WHERE paf."protectedAreaId" = $1;
+      `,
+      [id],
+    );
+
+    // ── Partenaires (techniques / stratégiques) de l'AP ─────────────────────
+    const partners = await this.dataSource.query(
+      `
+      SELECT
+        pap.id,
+        pap.type,
+        p.id   AS "partnerId",
+        p.name,
+        p.fullname
+      FROM public."protected_area_partner" pap
+      JOIN public."partner" p ON p.id = pap."partnerId"
+      WHERE pap."protectedAreaId" = $1;
+      `,
+      [id],
+    );
+
     return {
       ...result[0],
       fundings,
+      funders,
+      partners,
     };
   }
 

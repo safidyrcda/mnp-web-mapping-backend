@@ -5,6 +5,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -14,6 +15,14 @@ import { FunderFunding } from './funding-funder.model';
 import { ProtectedAreaFunding } from './protected-area-funding.model';
 import { Disbursement } from './disbursement.model';
 import { ActivityFunding } from './activity-funding.model';
+import { Funder } from './funder.model';
+
+export enum FundingType {
+  FUNDER = 'funder',
+  TECHNICAL_PARTNER = 'technical_partner',
+  STRATEGICAL_PARTNER = 'strategical_partner',
+  TECHNICAL_AND_FUNDER = 'technical_and_funder',
+}
 
 @Entity()
 export class Funding {
@@ -53,6 +62,22 @@ export class Funding {
 
   @CreateDateColumn()
   createdAt?: Date;
+
+  @ManyToOne(() => Funder, (f) => f.fundings, {
+    nullable: true,
+  })
+  @JoinColumn({ name: 'funderId' })
+  funder?: Funder;
+
+  @Column({
+    nullable: true,
+    type: 'enum',
+    enum: FundingType,
+  })
+  fundingType?: FundingType;
+
+  @Column({ nullable: true, type: 'varchar' })
+  funderComment?: string;
 
   @OneToMany(() => FunderFunding, (ff) => ff.funding, { cascade: true })
   funderFundings?: FunderFunding[];

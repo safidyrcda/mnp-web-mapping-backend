@@ -22,14 +22,23 @@ export class FundingRepository extends BaseRepository<Funding> {
     activityFundings: { activity: true }, // many-to-many via jointure
   };
 
+  async updateFunding(
+    id: string,
+    data: Partial<Funding>,
+  ): Promise<Funding | null> {
+    const entity = await this.repo.preload({ id, ...data });
+    if (!entity) return null;
+    return this.repo.save(entity);
+  }
+
   async find(): Promise<Funding[]> {
     return this.repo
       .createQueryBuilder('funding')
       .leftJoinAndSelect('funding.protectedAreaFundings', 'paf')
       .leftJoin('paf.protectedArea', 'pa')
       .addSelect(['pa.id', 'pa.sigle', 'pa.name', 'pa.status', 'pa.size'])
-      .leftJoinAndSelect('funding.funderFundings', 'ff')
-      .leftJoinAndSelect('ff.funder', 'funder')
+      .leftJoinAndSelect('funding.funder', 'ff')
+      .addSelect(['ff.id', 'ff.name'])
       .leftJoinAndSelect('funding.project', 'project')
       .leftJoinAndSelect('funding.disbursements', 'disbursements')
       .leftJoinAndSelect('funding.activityFundings', 'af')

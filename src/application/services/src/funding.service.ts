@@ -16,12 +16,14 @@ import { ProtectedArea } from 'src/infrastructure/models/protected-area.model';
 import { CreateDisbursementDto } from 'src/presentation/dtos/disbursement/create-disbursement.dto';
 import { CreateActivityDto } from 'src/presentation/dtos/activity/create-activity.dto';
 import { FunderFundingType } from 'src/infrastructure/models/funding-funder.model';
+import { CreatePartnershipDto } from 'src/presentation/dtos/funding/create-partnership.dto';
 
 export interface PAFundingEntry {
   protectedAreaId: string;
   amount?: number;
   currency?: string;
   amountInEuro?: number;
+  note?: string;
 }
 
 export interface FunderFundingEntry {
@@ -30,7 +32,7 @@ export interface FunderFundingEntry {
 }
 
 export interface CreateFundingData {
-  funders: string[];
+  funderId: string;
   protectedAreaIds: string[];
   projectId?: string;
   name?: string;
@@ -51,7 +53,7 @@ export interface GetFundingDetailData extends Funder {
 }
 
 export interface UpdateFundingData {
-  funders?: string[];
+  funderId?: string;
   protectedAreaIds?: string[];
   projectId?: string;
   name?: string;
@@ -92,11 +94,14 @@ export class FundingService extends BaseService<Funding> {
       data.protectedAreaIds,
     );
 
-    // 2. Valider les bailleurs
-    const funders = await this.resolveFunders(data.funders);
+    const funder = await this.funderRepository.findById(data.funderId);
+    if (!funder)
+      throw new Error(`Funder with ID ${data.funderId} does not exist.`);
 
     // 3. Construire le funding
     const newFunding: Partial<Funding> = {};
+
+    newFunding.funder = funder;
     if (data.name) newFunding.name = data.name;
     if (data.amount) newFunding.amount = data.amount;
     if (data.amountInEuro) newFunding.amountInEuro = data.amountInEuro;
@@ -120,14 +125,6 @@ export class FundingService extends BaseService<Funding> {
     for (const pa of protectedAreas) {
       await this.protectedAreaFundingRepository.create({
         protectedArea: pa,
-        funding: createdFunding,
-      });
-    }
-
-    // 5. Créer les relations Funder
-    for (const funder of funders) {
-      await this.funderFundingRepository.create({
-        funder,
         funding: createdFunding,
       });
     }
@@ -187,21 +184,22 @@ export class FundingService extends BaseService<Funding> {
     }
 
     if (data.description !== undefined) funding.description = data.description;
-    const updatedFunding = await this.repository.update(id, funding);
-    if (!updatedFunding)
-      throw new Error(`Funding with ID ${id} could not be updated.`);
 
     // Mise à jour des bailleurs
-    if (data.funders) {
-      await this.funderFundingRepository.deleteByFundingId(id);
-      const funders = await this.resolveFunders(data.funders);
-      for (const funder of funders) {
-        await this.funderFundingRepository.create({
-          funder,
-          funding: updatedFunding,
-        });
-      }
+    if (data.funderId) {
+      const funder = await this.funderRepository.findById(data.funderId);
+      if (!funder)
+        throw new Error(`Funder with ID ${data.funderId} does not exist.`);
+      funding.funder = funder; // ← seulement l'id
     }
+
+    console.log('Updating funding with data:', funding);
+
+    const updatedFunding = await this.repository.updateFunding(id, funding);
+
+    console.log('Updated funding:', updatedFunding);
+    if (!updatedFunding)
+      throw new Error(`Funding with ID ${id} could not be updated.`);
 
     // Mise à jour des APs
     if (data.protectedAreaIds) {
@@ -357,6 +355,7 @@ export class FundingService extends BaseService<Funding> {
         funding,
         amount: entry.amount,
         currency: entry.currency,
+        note: entry.note,
         amountInEuro: entry.amountInEuro,
       });
     }
@@ -396,5 +395,64 @@ export class FundingService extends BaseService<Funding> {
     }
 
     return this.funderFundingRepository.findByFundingId(fundingId);
+  }
+
+  async createPartnership(data: CreatePartnershipDto): Promise<Funding> {
+    if (!data.protectedAreaIds?.length) {
+      throw new Error('Au moins une aire protégée doit être sélectionnée.');
+    }
+    if (!data.fundingType) {
+      throw new Error('Le type de partenariat du funder est obligatoire.');
+    }
+
+    const protectedAreas = await this.resolveProtectedAreas(
+      data.protectedAreaIds,
+    );
+
+    const funder = await this.funderRepository.findById(data.funderId);
+    if (!funder)
+      throw new Error(`Funder with ID ${data.funderId} does not exist.`);
+
+    const newFunding: Partial<Funding> = {
+      funder: { id: funder.id } as Funder,
+      fundingType: data.fundingType,
+      name: data.name,
+      description: data.description,
+      debut: data.debut ? new Date(data.debut) : undefined,
+      end: data.end ? new Date(data.end) : undefined,
+      // amount, currency, amountInEuro : pas définis -> null par défaut en base
+    };
+
+    const createdFunding = await this.repository.create(newFunding);
+
+    for (const pa of protectedAreas) {
+      await this.protectedAreaFundingRepository.create({
+        protectedArea: pa,
+        funding: createdFunding,
+        // amount/currency/amountInEuro non fournis pour un partenariat
+      });
+    }
+
+    // Activités (existantes + nouvelles), réutilise la logique existante
+    const activitiesToLink = await this.resolveActivities(
+      data.activityIds ?? [],
+    );
+    for (const a of activitiesToLink) {
+      await this.activityFundingRepository.create({
+        activity: a,
+        funding: createdFunding,
+      });
+    }
+    if (data.newActivities?.length) {
+      for (const dto of data.newActivities) {
+        const created = await this.activityRepository.create(dto);
+        await this.activityFundingRepository.create({
+          activity: created,
+          funding: createdFunding,
+        });
+      }
+    }
+
+    return createdFunding;
   }
 }

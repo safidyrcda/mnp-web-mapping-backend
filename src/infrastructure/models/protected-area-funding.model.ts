@@ -24,4 +24,7 @@ export class ProtectedAreaFunding {
 
   @Column('float', { nullable: true })
   amountInEuro?: number;
+
+  @Column({ nullable: true, type: 'varchar' })
+  note?: string;
 }

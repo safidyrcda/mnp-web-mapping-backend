@@ -15,6 +15,8 @@ import { ActivityFunding } from './src/infrastructure/models/activity-funding.mo
 import { ProtectedAreaFunding } from './src/infrastructure/models/protected-area-funding.model';
 import { Disbursement } from './src/infrastructure/models/disbursement.model';
 import { ProtectedAreaFunder } from './src/infrastructure/models/protected-area-funder';
+import { ProtectedAreaPartner } from './src/infrastructure/models/protected-area-partner.model';
+import { Partner } from './src/infrastructure/models/partner.model';
 
 dotenv.config({ path: `.env` });
 dotenv.config();
@@ -44,6 +46,8 @@ export const AppDataSource = new DataSource({
     ProtectedAreaFunding,
     Disbursement,
     ProtectedAreaFunder,
+    Partner,
+    ProtectedAreaPartner,
   ],
   migrations: ['src/infrastructure/migrations/*.ts'],
   synchronize: false,

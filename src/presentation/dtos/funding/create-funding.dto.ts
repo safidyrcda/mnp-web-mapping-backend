@@ -14,15 +14,10 @@ import { CreateDisbursementDto } from '../disbursement/create-disbursement.dto';
 import { CreateActivityDto } from '../activity/create-activity.dto';
 
 export class CreateFundingDto {
-  @ApiProperty({
-    example: ['uuid-bailleur-1', 'uuid-bailleur-2'],
-    description: 'IDs des bailleurs/partenaires',
-    type: [String],
-  })
-  @IsArray()
-  @IsUUID('4', { each: true })
+  @ApiProperty({ example: 'uuid-bailleur' })
+  @IsUUID('4')
   @IsNotEmpty()
-  readonly funders!: string[];
+  readonly funderId!: string;
 
   @ApiProperty({ example: 'Breve description', required: false })
   @IsOptional()

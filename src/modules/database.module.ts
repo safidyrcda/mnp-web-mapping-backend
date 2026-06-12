@@ -17,6 +17,8 @@ import { PasswordResetToken } from 'src/infrastructure/models/auth/password-rese
 import { EmailVerificationToken } from 'src/infrastructure/models/auth/email-verification-token.model';
 import { ProtectedAreaFunding } from 'src/infrastructure/models/protected-area-funding.model';
 import { ProtectedAreaFunder } from 'src/infrastructure/models/protected-area-funder';
+import { Partner } from 'src/infrastructure/models/partner.model';
+import { ProtectedAreaPartner } from 'src/infrastructure/models/protected-area-partner.model';
 
 @Global()
 @Module({
@@ -48,6 +50,8 @@ import { ProtectedAreaFunder } from 'src/infrastructure/models/protected-area-fu
           PasswordResetToken,
           EmailVerificationToken,
           ProtectedAreaFunder,
+          Partner,
+          ProtectedAreaPartner,
         ],
         synchronize: false,
       }),

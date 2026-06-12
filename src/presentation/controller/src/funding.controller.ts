@@ -11,6 +11,7 @@ import {
 import { FundingService } from 'src/application/services/src/funding.service';
 import { Funding } from 'src/infrastructure/models/funding.model';
 import { CreateFundingDto } from 'src/presentation/dtos/funding/create-funding.dto';
+import { CreatePartnershipDto } from 'src/presentation/dtos/funding/create-partnership.dto';
 import { UpdateFundingDto } from 'src/presentation/dtos/funding/update-funding.dto';
 import { UpsertFunderFundingsDto } from 'src/presentation/dtos/funding/upsert-funder-fundings.dto';
 import { UpsertProtectedAreaFundingsDto } from 'src/presentation/dtos/funding/upsert-protected-area-fundings.dto';
@@ -53,6 +54,7 @@ export class FundingController {
     @Param('id') id: string,
     @Body() data: UpdateFundingDto,
   ): Promise<Funding | null> {
+    console.log(data);
     return this.fundingService.update(id, {
       ...data,
       debut: data.debut ? new Date(data.debut) : undefined,
@@ -108,5 +110,10 @@ export class FundingController {
     @Body() dto: UpsertFunderFundingsDto,
   ) {
     return this.fundingService.upsertFunderFundings(fundingId, dto.entries);
+  }
+
+  @Post('partnership')
+  createPartnership(@Body() dto: CreatePartnershipDto): Promise<Funding> {
+    return this.fundingService.createPartnership(dto);
   }
 }

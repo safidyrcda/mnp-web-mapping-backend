@@ -20,4 +20,9 @@ export class CreateProtectedAreaFundingDto {
   @IsOptional()
   @IsNumber()
   amountInEuro?: number;
+
+  @ApiProperty({ example: 'Commentaire sur le financement', required: false })
+  @IsOptional()
+  @IsString()
+  note?: string;
 }
