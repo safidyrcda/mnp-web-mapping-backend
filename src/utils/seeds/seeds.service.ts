@@ -107,7 +107,6 @@ export class SeedService {
         name: row.name,
         amount: amount,
         protectedAreaFundings: [{ protectedArea }],
-        funderFundings: [{ funder }],
       };
 
       if (debut) {

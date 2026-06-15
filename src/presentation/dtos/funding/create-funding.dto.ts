@@ -2,104 +2,92 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   IsArray,
   IsDateString,
-  IsNotEmpty,
+  IsEnum,
   IsNumber,
   IsOptional,
   IsString,
   IsUUID,
+  ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ValidateNested } from 'class-validator';
-import { CreateDisbursementDto } from '../disbursement/create-disbursement.dto';
-import { CreateActivityDto } from '../activity/create-activity.dto';
+import { FundingType } from 'src/infrastructure/models/funding.model';
+
+export class CreateActivityEntryDto {
+  @ApiProperty()
+  @IsString()
+  title!: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  description?: string;
+}
 
 export class CreateFundingDto {
-  @ApiProperty({ example: 'uuid-bailleur' })
-  @IsUUID('4')
-  @IsNotEmpty()
-  readonly funderId!: string;
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  name?: string;
 
-  @ApiProperty({ example: 'Breve description', required: false })
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
   description?: string;
 
-  @ApiProperty({
-    example: ['uuid-ap-1', 'uuid-ap-2'],
-    description: 'IDs des aires protégées concernées (1 ou plusieurs)',
-    type: [String],
-  })
-  @IsArray()
-  @IsUUID('4', { each: true })
-  @IsNotEmpty()
-  readonly protectedAreaIds!: string[]; // MODIFIÉ : était protectedAreaId (singulier)
-
-  @ApiProperty({ example: 'MIARO SY MIKOLO', required: false })
-  @IsOptional()
-  @IsString()
-  readonly name?: string;
-
-  @ApiProperty({ example: 'uuid-projet', required: false })
+  @ApiProperty({ example: 'uuid-funder' })
   @IsUUID('4')
-  @IsOptional()
-  readonly projectId?: string;
+  funderId!: string;
 
-  @ApiProperty({ example: '2024-01-01', required: false })
+  @ApiProperty({ enum: FundingType, required: false })
   @IsOptional()
-  @IsDateString()
-  readonly debut?: string;
+  @IsEnum(FundingType)
+  fundingType?: FundingType;
 
-  @ApiProperty({ example: '2026-12-31', required: false })
-  @IsOptional()
-  @IsDateString()
-  readonly end?: string;
+  @ApiProperty({ type: [String] })
+  @IsArray()
+  @IsUUID('4', { each: true })
+  protectedAreaIds!: string[];
 
-  @ApiProperty({ example: 500000, required: false })
-  @IsOptional()
-  @IsNumber()
-  readonly amount?: number;
-
-  @ApiProperty({ example: 'USD', required: false })
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  readonly currency?: string;
+  projectId?: string;
 
-  @ApiProperty({
-    example: 450000,
-    required: false,
-    description: 'Montant converti en Euro',
-  })
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsDateString()
+  debut?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsDateString()
+  end?: string;
+
+  @ApiProperty({ required: false })
   @IsOptional()
   @IsNumber()
-  readonly amountInEuro?: number;
+  amount?: number;
 
-  @ApiProperty({ type: [CreateDisbursementDto], required: false })
+  @ApiProperty({ required: false })
   @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => CreateDisbursementDto)
-  readonly disbursements?: CreateDisbursementDto[];
+  @IsString()
+  currency?: string;
 
-  @ApiProperty({
-    example: ['uuid-activity-1', 'uuid-activity-2'],
-    description: 'IDs des activités existantes à lier à ce financement',
-    type: [String],
-    required: false,
-  })
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsNumber()
+  amountInEuro?: number;
+
+  @ApiProperty({ type: [String], required: false })
   @IsOptional()
   @IsArray()
   @IsUUID('4', { each: true })
-  readonly activityIds?: string[];
+  activityIds?: string[];
 
-  @ApiProperty({
-    type: [CreateActivityDto],
-    required: false,
-    description:
-      'Nouvelles activités à créer et lier automatiquement à ce financement',
-  })
+  @ApiProperty({ type: [CreateActivityEntryDto], required: false })
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => CreateActivityDto)
-  readonly newActivities?: CreateActivityDto[];
+  @Type(() => CreateActivityEntryDto)
+  newActivities?: CreateActivityEntryDto[];
 }

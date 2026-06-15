@@ -20,6 +20,9 @@ import { ActivityRepository } from 'src/infrastructure/repositories/src/activity
 import { Activity } from 'src/infrastructure/models/activity.model';
 import { ActivityFunding } from 'src/infrastructure/models/activity-funding.model';
 import { ActivityFundingRepository } from 'src/infrastructure/repositories/src/activity-funding.repository';
+import { ProtectedAreaPartnerRepository } from 'src/infrastructure/repositories/src/protected-area-partner.repository';
+import { ProtectedAreaPartnerController } from 'src/presentation/controller/src/protected-area-partner.controller';
+import { ProtectedAreaPartner } from 'src/infrastructure/models/protected-area-partner.model';
 
 @Module({
   imports: [
@@ -33,20 +36,21 @@ import { ActivityFundingRepository } from 'src/infrastructure/repositories/src/a
       Disbursement,
       Activity,
       ActivityFunding,
+      ProtectedAreaPartner,
     ]),
   ],
-  controllers: [FundingController],
+  controllers: [FundingController, ProtectedAreaPartnerController],
   providers: [
+    FundingService,
     FundingRepository,
-    DisbursementRepository,
+    FunderRepository,
+    ProjectRepository,
+    ProtectedAreaRepository,
+    ProtectedAreaFundingRepository,
+    ProtectedAreaPartnerRepository,
     ActivityRepository,
     ActivityFundingRepository,
-    ProtectedAreaFundingRepository,
-    FunderRepository,
-    ProtectedAreaRepository,
-    FundingService,
-    ProjectRepository,
-    FunderFundingRepository,
+    DisbursementRepository,
   ],
   exports: [FundingRepository, FundingService],
 })

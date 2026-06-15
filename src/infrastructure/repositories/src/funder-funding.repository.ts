@@ -9,16 +9,4 @@ export class FunderFundingRepository extends BaseRepository<FunderFunding> {
   constructor(dataSource: DataSource) {
     super(dataSource, FunderFunding);
   }
-
-  async deleteByFundingId(fundingId: string): Promise<number> {
-    const result = await this.repository.delete({ funding: { id: fundingId } });
-    return result.affected ?? 0;
-  }
-
-  async findByFundingId(fundingId: string) {
-    return this.repository.find({
-      where: { funding: { id: fundingId } },
-      relations: ['funder'],
-    });
-  }
 }

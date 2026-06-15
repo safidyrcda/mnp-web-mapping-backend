@@ -38,7 +38,7 @@ export class FundingRepository extends BaseRepository<Funding> {
       .leftJoin('paf.protectedArea', 'pa')
       .addSelect(['pa.id', 'pa.sigle', 'pa.name', 'pa.status', 'pa.size'])
       .leftJoinAndSelect('pa.protectedAreaPartners', 'pap')
-      .leftJoinAndSelect('pap.partner', 'partner')
+      .leftJoinAndSelect('pap.funder', 'partnerFunder') // ← funder, pas partner
       .leftJoinAndSelect('funding.funder', 'ff')
       .addSelect(['ff.id', 'ff.name'])
       .leftJoinAndSelect('funding.project', 'project')
@@ -49,9 +49,7 @@ export class FundingRepository extends BaseRepository<Funding> {
       .getMany();
   }
   async findAllWithFunders(): Promise<Funding[]> {
-    return this.repo.find({
-      relations: { funderFundings: { funder: true } },
-    });
+    return this.repo.find({});
   }
 
   // Recherche par AP : on passe par la table de jointure ProtectedAreaFunding
@@ -72,7 +70,6 @@ export class FundingRepository extends BaseRepository<Funding> {
 
   async findAllFunder(fundingId: string): Promise<FunderFunding[]> {
     return this.dataSource.getRepository(FunderFunding).find({
-      where: { funding: { id: fundingId } },
       relations: { funder: true },
     });
   }

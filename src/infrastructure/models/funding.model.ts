@@ -1,6 +1,3 @@
-// src/infrastructure/models/funding.model.ts
-// AVANT : un seul protectedArea (ManyToOne)
-// APRÈS  : plusieurs APs via ProtectedAreaFunding + amountInEuro + disbursements
 import {
   Column,
   CreateDateColumn,
@@ -11,7 +8,6 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Project } from './project.model';
-import { FunderFunding } from './funding-funder.model';
 import { ProtectedAreaFunding } from './protected-area-funding.model';
 import { Disbursement } from './disbursement.model';
 import { ActivityFunding } from './activity-funding.model';
@@ -35,7 +31,6 @@ export class Funding {
   @Column({ nullable: true, type: 'text' })
   description?: string;
 
-  // Relation many-to-many avec ProtectedArea via table de jointure explicite
   @OneToMany(() => ProtectedAreaFunding, (paf) => paf.funding, {
     cascade: true,
   })
@@ -56,16 +51,13 @@ export class Funding {
   @Column({ nullable: true, type: 'varchar' })
   currency?: string;
 
-  // Montant converti en Euro (calculé ou saisi manuellement)
   @Column({ nullable: true, type: 'float' })
   amountInEuro?: number;
 
   @CreateDateColumn()
   createdAt?: Date;
 
-  @ManyToOne(() => Funder, (f) => f.fundings, {
-    nullable: true,
-  })
+  @ManyToOne(() => Funder, (f) => f.fundings, { nullable: true })
   @JoinColumn({ name: 'funderId' })
   funder?: Funder;
 
@@ -73,19 +65,16 @@ export class Funding {
     nullable: true,
     type: 'enum',
     enum: FundingType,
+    default: FundingType.FUNDER,
   })
   fundingType?: FundingType;
 
   @Column({ nullable: true, type: 'varchar' })
   funderComment?: string;
 
-  @OneToMany(() => FunderFunding, (ff) => ff.funding, { cascade: true })
-  funderFundings?: FunderFunding[];
-
   @OneToMany(() => Disbursement, (d) => d.funding, { cascade: true })
   disbursements?: Disbursement[];
 
-  // Relation many-to-many avec Activity via table de jointure explicite
   @OneToMany(() => ActivityFunding, (af) => af.funding, { cascade: true })
   activityFundings?: ActivityFunding[];
 }

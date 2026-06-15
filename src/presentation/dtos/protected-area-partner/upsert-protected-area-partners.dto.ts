@@ -1,22 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsArray,
-  IsEnum,
-  IsNotEmpty,
-  IsUUID,
-  ValidateNested,
-} from 'class-validator';
+import { IsArray, IsEnum, IsUUID, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { PartnerType } from 'src/infrastructure/models/protected-area-partner.model';
 
 class PartnerEntryDto {
-  @ApiProperty({ example: 'uuid-partner' })
+  @ApiProperty({ example: 'uuid-funder' })
   @IsUUID('4')
-  partnerId!: string;
+  funderId!: string;
 
   @ApiProperty({ enum: PartnerType })
   @IsEnum(PartnerType)
-  @IsNotEmpty()
   type!: PartnerType;
 }
 

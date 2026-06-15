@@ -1,427 +1,106 @@
-import { Injectable } from '@nestjs/common';
-import { BaseService } from '../base.service';
-import { Funding } from 'src/infrastructure/models/funding.model';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { Funding, FundingType } from 'src/infrastructure/models/funding.model';
 import { FundingRepository } from 'src/infrastructure/repositories/src/funding.repository';
 import { FunderRepository } from 'src/infrastructure/repositories/src/funder.repository';
-import { ProtectedAreaRepository } from 'src/infrastructure/repositories/src/protected-area.repository';
 import { ProjectRepository } from 'src/infrastructure/repositories/src/project.repository';
-import { FunderFundingRepository } from 'src/infrastructure/repositories/src/funder-funding.repository';
+import { ProtectedAreaRepository } from 'src/infrastructure/repositories/src/protected-area.repository';
 import { ProtectedAreaFundingRepository } from 'src/infrastructure/repositories/src/protected-area-funding.repository';
-import { DisbursementRepository } from 'src/infrastructure/repositories/src/disbursement.repository';
+import { ProtectedAreaPartnerRepository } from 'src/infrastructure/repositories/src/protected-area-partner.repository';
 import { ActivityRepository } from 'src/infrastructure/repositories/src/activity.repository';
 import { ActivityFundingRepository } from 'src/infrastructure/repositories/src/activity-funding.repository';
-import { Funder } from 'src/infrastructure/models/funder.model';
-import { Activity } from 'src/infrastructure/models/activity.model';
+import { DisbursementRepository } from 'src/infrastructure/repositories/src/disbursement.repository';
 import { ProtectedArea } from 'src/infrastructure/models/protected-area.model';
+import { PartnerType } from 'src/infrastructure/models/protected-area-partner.model';
+import { CreateFundingDto } from 'src/presentation/dtos/funding/create-funding.dto';
+import { UpdateFundingDto } from 'src/presentation/dtos/funding/update-funding.dto';
+import { CreateProtectedAreaFundingDto } from 'src/presentation/dtos/funding/create-protected-area-funding.dto';
 import { CreateDisbursementDto } from 'src/presentation/dtos/disbursement/create-disbursement.dto';
-import { CreateActivityDto } from 'src/presentation/dtos/activity/create-activity.dto';
-import { FunderFundingType } from 'src/infrastructure/models/funding-funder.model';
-import { CreatePartnershipDto } from 'src/presentation/dtos/funding/create-partnership.dto';
-
-export interface PAFundingEntry {
-  protectedAreaId: string;
-  amount?: number;
-  currency?: string;
-  amountInEuro?: number;
-  note?: string;
-}
-
-export interface FunderFundingEntry {
-  funderId: string;
-  type?: FunderFundingType;
-}
-
-export interface CreateFundingData {
-  funderId: string;
-  protectedAreaIds: string[];
-  projectId?: string;
-  name?: string;
-  debut?: string;
-  end?: string;
-  amount?: number;
-  currency?: string;
-  amountInEuro?: number;
-  disbursements?: CreateDisbursementDto[];
-  description?: string;
-  // IDs d'activités existantes à lier + éventuellement de nouvelles à créer
-  activityIds?: string[];
-  newActivities?: CreateActivityDto[];
-}
-
-export interface GetFundingDetailData extends Funder {
-  type?: FunderFundingType;
-}
-
-export interface UpdateFundingData {
-  funderId?: string;
-  protectedAreaIds?: string[];
-  projectId?: string;
-  name?: string;
-  debut?: Date;
-  end?: Date;
-  amount?: number;
-  currency?: string;
-  amountInEuro?: number;
-  description?: string;
-  disbursements?: CreateDisbursementDto[];
-  activityIds?: string[];
-  newActivities?: CreateActivityDto[];
-}
 
 @Injectable()
-export class FundingService extends BaseService<Funding> {
+export class FundingService {
   constructor(
-    protected repository: FundingRepository,
-    private funderRepository: FunderRepository,
-    private funderFundingRepository: FunderFundingRepository,
-    private protectedAreaRepository: ProtectedAreaRepository,
-    private protectedAreaFundingRepository: ProtectedAreaFundingRepository,
-    private projectRepository: ProjectRepository,
-    private disbursementRepository: DisbursementRepository,
-    private activityRepository: ActivityRepository,
-    private activityFundingRepository: ActivityFundingRepository,
-  ) {
-    super(repository);
-  }
+    private readonly repository: FundingRepository,
+    private readonly funderRepository: FunderRepository,
+    private readonly projectRepository: ProjectRepository,
+    private readonly protectedAreaRepository: ProtectedAreaRepository,
+    private readonly protectedAreaFundingRepository: ProtectedAreaFundingRepository,
+    private readonly protectedAreaPartnerRepository: ProtectedAreaPartnerRepository,
+    private readonly activityRepository: ActivityRepository,
+    private readonly activityFundingRepository: ActivityFundingRepository,
+    private readonly disbursementRepository: DisbursementRepository,
+  ) {}
 
-  async findAll(): Promise<Funding[]> {
+  // ── Lecture ──────────────────────────────────────────────────────────────
+
+  findAll(): Promise<Funding[]> {
     return this.repository.find();
   }
 
-  async create(data: CreateFundingData): Promise<Funding> {
-    // 1. Valider les APs
-    const protectedAreas = await this.resolveProtectedAreas(
-      data.protectedAreaIds,
-    );
-
-    const funder = await this.funderRepository.findById(data.funderId);
-    if (!funder)
-      throw new Error(`Funder with ID ${data.funderId} does not exist.`);
-
-    // 3. Construire le funding
-    const newFunding: Partial<Funding> = {};
-
-    newFunding.funder = funder;
-    if (data.name) newFunding.name = data.name;
-    if (data.amount) newFunding.amount = data.amount;
-    if (data.amountInEuro) newFunding.amountInEuro = data.amountInEuro;
-    if (data.debut) newFunding.debut = new Date(data.debut);
-    if (data.end) newFunding.end = new Date(data.end);
-    if (data.currency) newFunding.currency = data.currency;
-
-    if (data.projectId) {
-      const project = await this.projectRepository.findById(data.projectId);
-      if (!project)
-        throw new Error(`Project with ID ${data.projectId} does not exist.`);
-      newFunding.project = project;
-    }
-
-    if (data.description !== undefined)
-      newFunding.description = data.description;
-
-    const createdFunding = await this.repository.create(newFunding);
-
-    // 4. Créer les relations ProtectedArea
-    for (const pa of protectedAreas) {
-      await this.protectedAreaFundingRepository.create({
-        protectedArea: pa,
-        funding: createdFunding,
-      });
-    }
-
-    // 6. Créer les décaissements si fournis
-    if (data.disbursements?.length) {
-      for (const d of data.disbursements) {
-        await this.disbursementRepository.create({
-          ...d,
-          date: new Date(d.date),
-          funding: createdFunding,
-        });
-      }
-    }
-
-    // 7. Lier des activités existantes (par ID) + en créer de nouvelles → table ActivityFunding
-    const activitiesToLink = await this.resolveActivities(
-      data.activityIds ?? [],
-    );
-    for (const a of activitiesToLink) {
-      await this.activityFundingRepository.create({
-        activity: a,
-        funding: createdFunding,
-      });
-    }
-
-    if (data.newActivities?.length) {
-      for (const dto of data.newActivities) {
-        const created = await this.activityRepository.create(dto);
-        await this.activityFundingRepository.create({
-          activity: created,
-          funding: createdFunding,
-        });
-      }
-    }
-
-    return createdFunding;
-  }
-
-  async update(id: string, data: UpdateFundingData): Promise<Funding> {
-    const funding = await this.repository.findById(id);
-    if (!funding) throw new Error(`Funding with ID ${id} does not exist.`);
-
-    if (data.name !== undefined) funding.name = data.name;
-    if (data.amount) funding.amount = data.amount;
-    if (data.amountInEuro !== undefined)
-      funding.amountInEuro = data.amountInEuro;
-    if (data.debut) funding.debut = new Date(data.debut);
-    if (data.end) funding.end = new Date(data.end);
-    if (data.currency) funding.currency = data.currency;
-
-    if (data.projectId !== undefined) {
-      const project = await this.projectRepository.findById(data.projectId);
-      if (!project)
-        throw new Error(`Project with ID ${data.projectId} does not exist.`);
-      funding.project = project;
-    }
-
-    if (data.description !== undefined) funding.description = data.description;
-
-    // Mise à jour des bailleurs
-    if (data.funderId) {
-      const funder = await this.funderRepository.findById(data.funderId);
-      if (!funder)
-        throw new Error(`Funder with ID ${data.funderId} does not exist.`);
-      funding.funder = funder; // ← seulement l'id
-    }
-
-    console.log('Updating funding with data:', funding);
-
-    const updatedFunding = await this.repository.updateFunding(id, funding);
-
-    console.log('Updated funding:', updatedFunding);
-    if (!updatedFunding)
-      throw new Error(`Funding with ID ${id} could not be updated.`);
-
-    // Mise à jour des APs
-    if (data.protectedAreaIds) {
-      await this.protectedAreaFundingRepository.deleteByFundingId(id);
-      const protectedAreas = await this.resolveProtectedAreas(
-        data.protectedAreaIds,
-      );
-      for (const pa of protectedAreas) {
-        await this.protectedAreaFundingRepository.create({
-          protectedArea: pa,
-          funding: updatedFunding,
-        });
-      }
-    }
-
-    // Remplacement des décaissements
-    if (data.disbursements) {
-      await this.disbursementRepository.deleteByFundingId(id);
-      for (const d of data.disbursements) {
-        await this.disbursementRepository.create({
-          ...d,
-          date: new Date(d.date),
-          funding: updatedFunding,
-        });
-      }
-    }
-
-    // Mise à jour des liaisons Activity ↔ Funding (many-to-many)
-    // On supprime les liaisons existantes pour ce funding, puis on recrée
-    if (data.activityIds !== undefined || data.newActivities !== undefined) {
-      await this.activityFundingRepository.deleteByFundingId(id);
-
-      const activitiesToLink = await this.resolveActivities(
-        data.activityIds ?? [],
-      );
-      for (const a of activitiesToLink) {
-        await this.activityFundingRepository.create({
-          activity: a,
-          funding: updatedFunding,
-        });
-      }
-
-      if (data.newActivities?.length) {
-        for (const dto of data.newActivities) {
-          const created = await this.activityRepository.create(dto);
-          await this.activityFundingRepository.create({
-            activity: created,
-            funding: updatedFunding,
-          });
-        }
-      }
-    }
-
-    return updatedFunding;
-  }
-
-  async findFundersByProtectedArea(protectedAreaId: string): Promise<Funder[]> {
-    const fundings = await this.repository.findByAPId(protectedAreaId);
-    const fundersMap = new Map<string, Funder>();
-    for (const funding of fundings) {
-      for (const ff of funding.funderFundings ?? []) {
-        const funder = ff.funder!;
-        if (!fundersMap.has(funder.id!)) fundersMap.set(funder.id!, funder);
-      }
-    }
-    return Array.from(fundersMap.values());
-  }
-
-  async findFundersByFunding(
-    fundingId: string,
-  ): Promise<GetFundingDetailData[]> {
-    const funderFundings = await this.repository.findAllFunder(fundingId);
-    const fundersMap = new Map<string, GetFundingDetailData>();
-    for (const ff of funderFundings) {
-      const funder = ff.funder!;
-      if (!fundersMap.has(funder.id!))
-        fundersMap.set(funder.id!, { ...funder, type: ff.type });
-    }
-    return Array.from(fundersMap.values());
+  findFundersByFunding(fundingId: string) {
+    return this.repository.findAllFunder(fundingId);
   }
 
   findByProtectedArea(protectedAreaId: string): Promise<Funding[]> {
     return this.repository.findByAPId(protectedAreaId);
   }
 
-  // ─── helpers privés ───────────────────────────────────────────────────────
-
-  private async resolveProtectedAreas(ids: string[]): Promise<ProtectedArea[]> {
-    const results: ProtectedArea[] = [];
-    for (const id of ids) {
-      const pa = await this.protectedAreaRepository.findById(id);
-      if (!pa) throw new Error(`Protected Area with ID ${id} does not exist.`);
-      results.push(pa);
-    }
-    return results;
+  findFundersByProtectedArea(protectedAreaId: string) {
+    return this.repository.findByAPId(protectedAreaId).then((fundings) => {
+      const map = new Map<
+        string,
+        { id: string; name: string; fullname?: string }
+      >();
+      for (const f of fundings) {
+        if (f.funder?.id) {
+          map.set(f.funder.id, {
+            id: f.funder.id,
+            name: f.funder.name ?? '',
+            fullname: f.funder.fullname,
+          });
+        }
+      }
+      return Array.from(map.values());
+    });
   }
 
-  private async resolveFunders(ids: string[]): Promise<Funder[]> {
-    const results: Funder[] = [];
-    for (const id of ids) {
-      const funder = await this.funderRepository.findById(id);
-      if (!funder) throw new Error(`Funder with ID ${id} does not exist.`);
-      results.push(funder);
-    }
-    return results;
-  }
+  // ── Création ─────────────────────────────────────────────────────────────
 
-  private async resolveActivities(ids: string[]): Promise<Activity[]> {
-    const results: Activity[] = [];
-    for (const id of ids) {
-      const activity = await this.activityRepository.findById(id);
-      if (!activity) throw new Error(`Activity with ID ${id} does not exist.`);
-      results.push(activity);
-    }
-    return results;
-  }
-
-  /**
-   * GET :fundingId/protected-area-fundings
-   * Retourne toutes les liaisons ProtectedAreaFunding d'un financement
-   */
-  async findProtectedAreaFundings(fundingId: string) {
-    return this.protectedAreaFundingRepository.findByFundingId(fundingId);
-  }
-
-  /**
-   * PUT :fundingId/protected-area-fundings
-   * Remplace toutes les liaisons AP d'un financement (upsert complet)
-   */
-  async upsertProtectedAreaFundings(
-    fundingId: string,
-    entries: PAFundingEntry[],
-  ) {
-    const funding = await this.repository.findById(fundingId);
-    if (!funding)
-      throw new Error(`Funding with ID ${fundingId} does not exist.`);
-
-    // Supprimer les liaisons existantes
-    await this.protectedAreaFundingRepository.deleteByFundingId(fundingId);
-
-    // Recréer avec les nouvelles valeurs
-    for (const entry of entries) {
-      const pa = await this.protectedAreaRepository.findById(
-        entry.protectedAreaId,
-      );
-      if (!pa)
-        throw new Error(
-          `Protected Area with ID ${entry.protectedAreaId} does not exist.`,
-        );
-
-      await this.protectedAreaFundingRepository.create({
-        protectedArea: pa,
-        funding,
-        amount: entry.amount,
-        currency: entry.currency,
-        note: entry.note,
-        amountInEuro: entry.amountInEuro,
-      });
-    }
-
-    return this.protectedAreaFundingRepository.findByFundingId(fundingId);
-  }
-
-  /**
-   * GET :fundingId/funder-fundings
-   * Retourne toutes les liaisons FunderFunding d'un financement (avec type)
-   */
-  async findFunderFundings(fundingId: string) {
-    return this.funderFundingRepository.findByFundingId(fundingId);
-  }
-
-  /**
-   * PUT :fundingId/funder-fundings
-   * Remplace toutes les liaisons Funder d'un financement (upsert complet)
-   */
-  async upsertFunderFundings(fundingId: string, entries: FunderFundingEntry[]) {
-    const funding = await this.repository.findById(fundingId);
-    if (!funding)
-      throw new Error(`Funding with ID ${fundingId} does not exist.`);
-
-    await this.funderFundingRepository.deleteByFundingId(fundingId);
-
-    for (const entry of entries) {
-      const funder = await this.funderRepository.findById(entry.funderId);
-      if (!funder)
-        throw new Error(`Funder with ID ${entry.funderId} does not exist.`);
-
-      await this.funderFundingRepository.create({
-        funder,
-        funding,
-        type: entry.type,
-      });
-    }
-
-    return this.funderFundingRepository.findByFundingId(fundingId);
-  }
-
-  async createPartnership(data: CreatePartnershipDto): Promise<Funding> {
-    if (!data.protectedAreaIds?.length) {
-      throw new Error('Au moins une aire protégée doit être sélectionnée.');
-    }
-    if (!data.fundingType) {
-      throw new Error('Le type de partenariat du funder est obligatoire.');
-    }
-
+  async create(data: CreateFundingDto): Promise<Funding> {
     const protectedAreas = await this.resolveProtectedAreas(
       data.protectedAreaIds,
     );
 
     const funder = await this.funderRepository.findById(data.funderId);
-    if (!funder)
-      throw new Error(`Funder with ID ${data.funderId} does not exist.`);
+    if (!funder) {
+      throw new NotFoundException(
+        `Funder with ID ${data.funderId} does not exist.`,
+      );
+    }
 
     const newFunding: Partial<Funding> = {
-      funder: { id: funder.id } as Funder,
-      fundingType: data.fundingType,
-      name: data.name,
-      description: data.description,
-      debut: data.debut ? new Date(data.debut) : undefined,
-      end: data.end ? new Date(data.end) : undefined,
-      // amount, currency, amountInEuro : pas définis -> null par défaut en base
+      funder,
+      fundingType: data.fundingType ?? FundingType.FUNDER,
     };
+
+    if (data.name !== undefined) newFunding.name = data.name;
+    if (data.description !== undefined)
+      newFunding.description = data.description;
+    if (data.amount !== undefined) newFunding.amount = data.amount;
+    if (data.amountInEuro !== undefined)
+      newFunding.amountInEuro = data.amountInEuro;
+    if (data.currency !== undefined) newFunding.currency = data.currency;
+    if (data.debut) newFunding.debut = new Date(data.debut);
+    if (data.end) newFunding.end = new Date(data.end);
+
+    if (data.projectId) {
+      const project = await this.projectRepository.findById(data.projectId);
+      if (!project) {
+        throw new NotFoundException(
+          `Project with ID ${data.projectId} does not exist.`,
+        );
+      }
+      newFunding.project = project;
+    }
 
     const createdFunding = await this.repository.create(newFunding);
 
@@ -429,30 +108,224 @@ export class FundingService extends BaseService<Funding> {
       await this.protectedAreaFundingRepository.create({
         protectedArea: pa,
         funding: createdFunding,
-        // amount/currency/amountInEuro non fournis pour un partenariat
       });
     }
 
-    // Activités (existantes + nouvelles), réutilise la logique existante
-    const activitiesToLink = await this.resolveActivities(
-      data.activityIds ?? [],
+    await this.syncProtectedAreaPartners(
+      createdFunding,
+      protectedAreas,
+      newFunding.fundingType,
     );
-    for (const a of activitiesToLink) {
-      await this.activityFundingRepository.create({
-        activity: a,
-        funding: createdFunding,
-      });
+
+    await this.syncActivities(
+      createdFunding.id!,
+      data.activityIds,
+      data.newActivities,
+    );
+
+    return this.repository.findById(createdFunding.id!) as Promise<Funding>;
+  }
+
+  // ── Mise à jour ──────────────────────────────────────────────────────────
+
+  async update(id: string, data: UpdateFundingDto): Promise<Funding> {
+    const funding = await this.repository.findById(id);
+    if (!funding) {
+      throw new NotFoundException(`Funding with ID ${id} does not exist.`);
     }
-    if (data.newActivities?.length) {
-      for (const dto of data.newActivities) {
-        const created = await this.activityRepository.create(dto);
+
+    if (data.name !== undefined) funding.name = data.name;
+    if (data.description !== undefined) funding.description = data.description;
+    if (data.amount !== undefined) funding.amount = data.amount;
+    if (data.amountInEuro !== undefined)
+      funding.amountInEuro = data.amountInEuro;
+    if (data.currency !== undefined) funding.currency = data.currency;
+    if (data.fundingType !== undefined) funding.fundingType = data.fundingType;
+    if (data.debut) funding.debut = new Date(data.debut);
+    if (data.end) funding.end = new Date(data.end);
+
+    if (data.funderId) {
+      const funder = await this.funderRepository.findById(data.funderId);
+      if (!funder) {
+        throw new NotFoundException(
+          `Funder with ID ${data.funderId} does not exist.`,
+        );
+      }
+      funding.funder = funder;
+    }
+
+    if (data.projectId !== undefined) {
+      if (data.projectId === null || data.projectId === '') {
+        funding.project = undefined;
+      } else {
+        const project = await this.projectRepository.findById(data.projectId);
+        if (!project) {
+          throw new NotFoundException(
+            `Project with ID ${data.projectId} does not exist.`,
+          );
+        }
+        funding.project = project;
+      }
+    }
+
+    const updatedFunding = await this.repository.updateFunding(id, funding);
+    if (!updatedFunding) {
+      throw new NotFoundException(
+        `Funding with ID ${id} could not be updated.`,
+      );
+    }
+
+    if (data.protectedAreaIds) {
+      const protectedAreas = await this.resolveProtectedAreas(
+        data.protectedAreaIds,
+      );
+
+      await this.protectedAreaFundingRepository.deleteByFundingId(id);
+      for (const pa of protectedAreas) {
+        await this.protectedAreaFundingRepository.create({
+          protectedArea: pa,
+          funding: updatedFunding,
+        });
+      }
+
+      await this.syncProtectedAreaPartners(
+        updatedFunding,
+        protectedAreas,
+        data.fundingType ?? funding.fundingType,
+      );
+    }
+
+    if (data.activityIds || data.newActivities) {
+      await this.syncActivities(id, data.activityIds, data.newActivities);
+    }
+
+    return this.repository.findById(id) as Promise<Funding>;
+  }
+
+  async delete(id: string): Promise<boolean> {
+    return this.repository.delete(id);
+  }
+
+  // ── Montants par AP ──────────────────────────────────────────────────────
+
+  findProtectedAreaFundings(fundingId: string) {
+    return this.protectedAreaFundingRepository.findByFundingId(fundingId);
+  }
+
+  upsertProtectedAreaFundings(
+    fundingId: string,
+    entries: CreateProtectedAreaFundingDto[],
+  ) {
+    return this.protectedAreaFundingRepository.upsertForFunding(
+      fundingId,
+      entries,
+    );
+  }
+
+  // ── Décaissements ────────────────────────────────────────────────────────
+
+  async createDisbursement(fundingId: string, data: CreateDisbursementDto) {
+    const funding = await this.repository.findById(fundingId);
+    if (!funding) {
+      throw new NotFoundException(
+        `Funding with ID ${fundingId} does not exist.`,
+      );
+    }
+    return this.disbursementRepository.create({
+      ...data,
+      funding,
+      date: new Date(data.date),
+    });
+  }
+
+  // ── Helpers privés ───────────────────────────────────────────────────────
+
+  private async resolveProtectedAreas(ids: string[]): Promise<ProtectedArea[]> {
+    const areas: ProtectedArea[] = [];
+    for (const id of ids) {
+      const pa = await this.protectedAreaRepository.findById(id);
+      if (!pa) {
+        throw new NotFoundException(
+          `Protected area with ID ${id} does not exist.`,
+        );
+      }
+      areas.push(pa);
+    }
+    return areas;
+  }
+
+  private isPartnershipType(type?: FundingType): boolean {
+    return (
+      type === FundingType.TECHNICAL_PARTNER ||
+      type === FundingType.STRATEGICAL_PARTNER ||
+      type === FundingType.TECHNICAL_AND_FUNDER
+    );
+  }
+
+  private mapToPartnerType(type: FundingType): PartnerType {
+    return type === FundingType.STRATEGICAL_PARTNER
+      ? PartnerType.STRATEGICAL_PARTNER
+      : PartnerType.TECHNICAL_PARTNER;
+  }
+
+  private async syncProtectedAreaPartners(
+    funding: Funding,
+    protectedAreas: ProtectedArea[],
+    fundingType?: FundingType,
+  ) {
+    if (!this.isPartnershipType(fundingType) || !funding.funder) return;
+
+    const partnerType = this.mapToPartnerType(fundingType!);
+
+    for (const pa of protectedAreas) {
+      const existing =
+        await this.protectedAreaPartnerRepository.findByProtectedAreaAndFunder(
+          pa.id!,
+          funding.funder.id!,
+        );
+
+      if (existing) {
+        existing.type = partnerType;
+        await this.protectedAreaPartnerRepository.update(
+          existing.id!,
+          existing,
+        );
+      } else {
+        await this.protectedAreaPartnerRepository.create({
+          protectedArea: pa,
+          funder: funding.funder,
+          type: partnerType,
+        });
+      }
+    }
+  }
+
+  private async syncActivities(
+    fundingId: string,
+    activityIds?: string[],
+    newActivities?: { title: string; description?: string }[],
+  ) {
+    if (activityIds) {
+      await this.activityFundingRepository.deleteByFundingId(fundingId);
+      for (const activityId of activityIds) {
         await this.activityFundingRepository.create({
-          activity: created,
-          funding: createdFunding,
+          funding: { id: fundingId } as Funding,
+          activity: { id: activityId } as any,
         });
       }
     }
 
-    return createdFunding;
+    if (newActivities && newActivities.length > 0) {
+      for (const a of newActivities) {
+        const created = await this.activityRepository.create({
+          title: a.title,
+          description: a.description,
+        });
+        await this.activityFundingRepository.create({
+          funding: { id: fundingId } as Funding,
+          activity: created,
+        });
+      }
+    }
   }
 }

@@ -16,9 +16,6 @@ export class FunderFunding {
   @ManyToOne(() => Funder, (f) => f.funderFunding, { nullable: false })
   funder?: Funder;
 
-  @ManyToOne(() => Funding, (f) => f.funderFundings, { nullable: false })
-  funding?: Funding;
-
   @Column({
     nullable: true,
     type: 'enum',
