@@ -26,6 +26,7 @@ export class ProtectedAreaRepository extends BaseRepository<ProtectedArea> {
       "maleClpNumber",
       ST_Area(geometry::geography) / 10000 AS size
     FROM public."protected_area"
+    ORDER BY name ASC
     LIMIT 50;
   `);
 
@@ -73,6 +74,7 @@ export class ProtectedAreaRepository extends BaseRepository<ProtectedArea> {
       paf.amount          AS "paAmount",
       paf.currency        AS "paCurrency",
       paf."amountInEuro"  AS "paAmountInEuro",
+      paf.note AS "paNote",
 
       COALESCE((
         SELECT SUM(d.amount)
@@ -106,7 +108,7 @@ export class ProtectedAreaRepository extends BaseRepository<ProtectedArea> {
 
       -- Autres APs liées au même funding
       (
-        SELECT COALESCE(JSON_AGG(sub), '[]')
+        SELECT COALESCE(JSON_AGG(sub ORDER BY sub.name), '[]')
         FROM (
           SELECT DISTINCT pa2.id, pa2.sigle, pa2.name
           FROM public."protected_area_funding" paf2
@@ -130,7 +132,8 @@ export class ProtectedAreaRepository extends BaseRepository<ProtectedArea> {
       FROM public."protected_area_funding" paf
       JOIN public."funding" f ON f.id = paf."fundingId"
       JOIN public."funder" fu ON fu.id = f."funderId"
-      WHERE paf."protectedAreaId" = $1;
+      WHERE paf."protectedAreaId" = $1
+      ORDER BY fu.name ASC;
       `,
       [id],
     );
@@ -146,7 +149,8 @@ export class ProtectedAreaRepository extends BaseRepository<ProtectedArea> {
         p.fullname
       FROM public."protected_area_partner" pap
       JOIN public."partner" p ON p.id = pap."partnerId"
-      WHERE pap."protectedAreaId" = $1;
+      WHERE pap."protectedAreaId" = $1
+      ORDER BY p.name ASC;
       `,
       [id],
     );
@@ -182,6 +186,7 @@ export class ProtectedAreaRepository extends BaseRepository<ProtectedArea> {
           4326
         ))::json AS geometry
       FROM public."protected_area"
+      ORDER BY name ASC
       LIMIT 50;
     `);
 
