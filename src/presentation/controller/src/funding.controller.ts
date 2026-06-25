@@ -77,6 +77,7 @@ export class FundingController {
     @Param('fundingId') fundingId: string,
     @Body() dto: UpsertProtectedAreaFundingsDto,
   ) {
+    console.log(dto);
     return this.fundingService.upsertProtectedAreaFundings(
       fundingId,
       dto.entries,

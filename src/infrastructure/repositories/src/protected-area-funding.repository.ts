@@ -42,13 +42,13 @@ export class ProtectedAreaFundingRepository {
     fundingId: string,
     entries: {
       protectedAreaId: string;
-      amount?: number;
-      currency?: string;
-      amountInEuro?: number;
+      amount?: number | null;
+      currency?: string | null;
+      amountInEuro?: number | null;
+      note?: string | null;
     }[],
   ): Promise<ProtectedAreaFunding[]> {
     const existing = await this.findByFundingId(fundingId);
-
     const result: ProtectedAreaFunding[] = [];
 
     for (const entry of entries) {
@@ -57,17 +57,23 @@ export class ProtectedAreaFundingRepository {
       );
 
       if (found) {
-        found.amount = entry.amount;
-        found.currency = entry.currency;
-        found.amountInEuro = entry.amountInEuro;
+        // N'écraser que les champs explicitement présents dans le payload
+        if (entry.amount !== undefined)
+          found.amount = entry.amount ?? undefined;
+        if (entry.currency !== undefined)
+          found.currency = entry.currency ?? undefined;
+        if (entry.amountInEuro !== undefined)
+          found.amountInEuro = entry.amountInEuro ?? undefined;
+        if (entry.note !== undefined) found.note = entry.note ?? undefined;
         result.push(await this.repo.save(found));
       } else {
         const entity = this.repo.create({
           funding: { id: fundingId } as Funding,
           protectedArea: { id: entry.protectedAreaId } as ProtectedArea,
-          amount: entry.amount,
-          currency: entry.currency,
-          amountInEuro: entry.amountInEuro,
+          amount: entry.amount ?? undefined,
+          currency: entry.currency ?? undefined,
+          amountInEuro: entry.amountInEuro ?? undefined,
+          note: entry.note ?? undefined,
         });
         result.push(await this.repo.save(entity));
       }
