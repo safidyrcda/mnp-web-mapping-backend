@@ -19,4 +19,9 @@ export class FunderRepository extends BaseRepository<Funder> {
   async findOneByName(name: string) {
     return this.dataSource.getRepository(Funder).findOneBy({ name });
   }
+
+  async update(id: string, data: Partial<Funder>): Promise<Funder | null> {
+    await this.dataSource.getRepository(Funder).update({ id }, data);
+    return this.dataSource.getRepository(Funder).findOneBy({ id });
+  }
 }

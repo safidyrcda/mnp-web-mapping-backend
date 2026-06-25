@@ -12,4 +12,8 @@ export class FunderService extends BaseService<Funder> {
   create(data: Partial<Funder>): Promise<Funder> {
     return this.repository.create(data);
   }
+
+  async update(id: string, data: Partial<Funder>): Promise<Funder | null> {
+    return this.repository.update(id, data);
+  }
 }

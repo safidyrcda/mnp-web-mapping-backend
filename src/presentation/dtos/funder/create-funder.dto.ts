@@ -21,3 +21,15 @@ export class CreateFunderDto {
   @IsNotEmpty()
   readonly name: string;
 }
+
+export class UpdateFunderDto {
+  @ApiProperty({ example: 'KFW', required: false })
+  @IsOptional()
+  @IsString()
+  readonly name?: string;
+
+  @ApiProperty({ example: 'Kreditanstalt für Wiederaufbau', required: false })
+  @IsOptional()
+  @IsString()
+  readonly fullname?: string;
+}

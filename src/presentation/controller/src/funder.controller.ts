@@ -9,7 +9,10 @@ import {
 } from '@nestjs/common';
 import { FunderService } from 'src/application/services/src/funder.service';
 import { Funder } from 'src/infrastructure/models/funder.model';
-import { CreateFunderDto } from 'src/presentation/dtos/funder/create-funder.dto';
+import {
+  CreateFunderDto,
+  UpdateFunderDto,
+} from 'src/presentation/dtos/funder/create-funder.dto';
 
 @Controller('funders')
 export class FunderController {
@@ -25,13 +28,13 @@ export class FunderController {
     return this.funderService.create(data);
   }
 
-  //   @Patch(':id')
-  //   async update(
-  //     @Param('id') id: string,
-  //     @Body() data: Partial<Funder>,
-  //   ): Promise<Funder | null> {
-  //     return this.funderService.update(id, data);
-  //   }
+  @Patch(':id')
+  async update(
+    @Param('id') id: string,
+    @Body() data: UpdateFunderDto,
+  ): Promise<Funder | null> {
+    return this.funderService.update(id, data);
+  }
 
   @Delete(':id')
   async delete(@Param('id') id: string): Promise<boolean> {
