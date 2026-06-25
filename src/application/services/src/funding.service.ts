@@ -180,12 +180,29 @@ export class FundingService {
         data.protectedAreaIds,
       );
 
-      await this.protectedAreaFundingRepository.deleteByFundingId(id);
+      // ── Upsert au lieu de delete + recreate ──────────────────────────────
+      const existing =
+        await this.protectedAreaFundingRepository.findByFundingId(id);
+      const existingPaIds = existing.map((e) => e.protectedArea?.id ?? '');
+      const newPaIds = protectedAreas.map((pa) => pa.id!);
+
+      // Ajouter uniquement les nouvelles APs (sans toucher aux existantes et leurs montants)
       for (const pa of protectedAreas) {
-        await this.protectedAreaFundingRepository.create({
-          protectedArea: pa,
-          funding: updatedFunding,
-        });
+        const alreadyLinked = existingPaIds.includes(pa.id!);
+        if (!alreadyLinked) {
+          await this.protectedAreaFundingRepository.create({
+            protectedArea: pa,
+            funding: updatedFunding,
+          });
+        }
+      }
+
+      // Supprimer uniquement les APs retirées de la sélection
+      const toRemove = existing.filter(
+        (e) => !newPaIds.includes(e.protectedArea?.id ?? ''),
+      );
+      for (const paf of toRemove) {
+        await this.protectedAreaFundingRepository.deleteById(paf.id!);
       }
 
       await this.syncProtectedAreaPartners(

@@ -34,6 +34,10 @@ export class ProtectedAreaFundingRepository {
     await this.repo.delete({ funding: { id: fundingId } });
   }
 
+  async deleteById(id: string): Promise<void> {
+    await this.repo.delete({ id });
+  }
+
   async upsertForFunding(
     fundingId: string,
     entries: {
